@@ -1,0 +1,98 @@
+<div class="flex flex-col md:flex-row justify-between w-full gap-2">
+  <div class="w-full md:w-1/2 border border-gray-300 rounded-lg py-2 px-4 flex flex-col">
+    <div class="mb-6 flex flex-col">
+      <span class="text-base md:text-lg font-bold">Recent Transactions</span>
+      @if (!isLoading) {
+        <span class="text-xs text-gray-500">You made {{this.transactionCount}} transactions this month</span>
+      } @else {
+        <div class="h-4 w-32 bg-gray-200 rounded mt-1 animate-pulse"></div>
+      }
+    </div>
+    
+    <!-- Transactions Table -->
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+            <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+            <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+            <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+            <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          @if (isLoading) {
+            <!-- Skeleton Rows -->
+            @for (i of [1,2,3,4,5]; track i) {
+              <tr>
+                <td class="px-3 py-3 whitespace-nowrap"><div class="h-4 w-16 bg-gray-200 rounded animate-pulse"></div></td>
+                <td class="px-3 py-3">
+                  <div class="h-4 w-24 bg-gray-200 rounded animate-pulse"></div>
+                  <div class="h-3 w-16 bg-gray-200 rounded animate-pulse mt-1"></div>
+                </td>
+                <td class="px-3 py-3 whitespace-nowrap"><div class="h-6 w-20 bg-gray-200 rounded-full animate-pulse"></div></td>
+                <td class="px-3 py-3 whitespace-nowrap"><div class="h-4 w-16 bg-gray-200 rounded animate-pulse"></div></td>
+                <td class="px-3 py-3 whitespace-nowrap"><div class="h-4 w-12 bg-gray-200 rounded animate-pulse"></div></td>
+              </tr>
+            }
+          } @else {
+            <!-- Actual Data Rows -->
+            @for(transaction of transactionList; track transaction.transactionMasterId){
+              <tr>
+                <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-500">
+                  {{ transaction.transactionDate | date:'MMM d' }}
+                </td>
+                <td class="px-3 py-3 text-sm text-gray-900">
+                  {{ transaction.transactionDescription }}
+                  @if(transaction.transactionNote != null) {
+                    <span class="block text-xs text-gray-500">
+                      {{ transaction.transactionNote }}
+                    </span>
+                  }
+                </td>
+                <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-500">
+                  <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full"
+                        [ngClass]="{
+                          'bg-green-100 text-green-800': transaction.transactionCategoryMasterId === 1,
+                          'bg-blue-100 text-blue-800': transaction.transactionCategoryMasterId === 2,
+                          'bg-purple-100 text-purple-800': transaction.transactionCategoryMasterId === 3,
+                          'bg-yellow-100 text-yellow-800': transaction.transactionCategoryMasterId === 4,
+                          'bg-red-100 text-red-800': transaction.transactionCategoryMasterId === 5,
+                          'bg-gray-100 text-gray-800': !transaction.transactionCategoryMasterId
+                        }">
+                    {{ transaction.transactionCategory || 'Uncategorized' }}
+                  </span>
+                </td>
+                <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-500">
+                  {{ transaction.transactionType }}
+                </td>
+                <td class="px-3 py-3 whitespace-nowrap text-sm font-medium"
+                    [ngClass]="{
+                      'text-green-600': transaction.transactionTypeMasterId === 1,
+                      'text-red-600': transaction.transactionTypeMasterId !== 1
+                    }">
+                  {{ transaction.transactionTypeMasterId === 1 ? '+' : '-' }}{{ transaction.transactionAmount }}
+                </td>
+              </tr>
+            }
+            @empty {
+              <tr>
+                <td colspan="5" class="px-3 py-3 text-center text-sm text-gray-500">
+                  No transactions found
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+    
+    <!-- View All Link -->
+    @if (!isLoading) {
+      <div class="mt-4 text-right">
+        <a href="#" class="text-sm font-medium text-blue-600 hover:text-blue-500">View all transactions →</a>
+      </div>
+    }
+  </div>
+</div>
