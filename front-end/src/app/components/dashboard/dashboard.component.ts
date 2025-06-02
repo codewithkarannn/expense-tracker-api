@@ -7,13 +7,15 @@ import { OverviewComponent } from '../overview/overview.component';
 import { NgClass } from '@angular/common';
 import { AllTransactionsComponent } from '../all-transactions/all-transactions.component';
 import { TransactionStateService } from '../../services/transaction-state.service';
+import { ToastServiceService } from '../../services/toast-service.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-dashboard',
 
   imports: [
     PopupAddTransactionFormComponent,
-    NgClass ,
+    NgClass,
     AllTransactionsComponent,
     OverviewComponent
   ],
@@ -26,29 +28,37 @@ export class DashboardComponent implements OnInit {
   transactionTypes = <TransactionType[]>([]);
   transactionSummary = <TransactionSummary>{};
   transactionCategories = <TransactionCategory[]>([]);
-  state  = inject(TransactionStateService);
+  state = inject(TransactionStateService);
   showAddTransactionForm = signal(false);
   activeTab: string = 'overview'; // Default active tab
   userId = '';
   authToken: string | null = null;
- 
-  constructor(private transactionsService: TransactionsService) {
+
+  constructor(private transactionsService: TransactionsService, private toast: ToastServiceService, private router: Router) {
   }
   ngOnInit() {
     this.state.tab$.subscribe(tab => {
       this.activeTab = tab;
     });
-  
+
 
     this.getallTransactionTypes();
-    this.getallTransactionCategories() ;
+    this.getallTransactionCategories();
     this.authToken = localStorage.getItem('auth_token');
-    if(this.authToken != null)
-    {
+    if (this.authToken != null) {
       this.userId = this.extractUserIdFromToken(this.authToken);
     }
     ;
     this.getTransactionSummary();
+  }
+  logout() {
+    localStorage.removeItem('auth_token');
+    this.toast.show({
+      message: 'Login out successful!',
+      type: 'success',
+      duration: 3000
+    });
+    this.router.navigate(['/login']);
   }
 
   getallTransactionTypes(): void {
@@ -58,7 +68,7 @@ export class DashboardComponent implements OnInit {
 
           if (response.success) {
             this.transactionTypes = response.data;
-      
+
           }
 
         },
@@ -72,7 +82,7 @@ export class DashboardComponent implements OnInit {
     try {
       // Remove 'Bearer ' prefix if present
       const actualToken = token.replace(/^Bearer\s+/i, '');
-      
+
       // Split the token
       const parts = actualToken.split('.');
       if (parts.length !== 3) {
@@ -89,14 +99,14 @@ export class DashboardComponent implements OnInit {
           .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
           .join('')
       );
-      
+
       const payload = JSON.parse(payloadJson);
-      
+
       // Debug: Log the entire payload to verify structure
       console.log('Full token payload:', payload);
 
       // Try different common claim names for user ID
-      const userId = 
+      const userId =
         payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'] ||
         payload.nameidentifier ||
         payload.sub ||
@@ -112,26 +122,26 @@ export class DashboardComponent implements OnInit {
       console.error('Error parsing token:', e);
       return '';
     }
-}
+  }
   getTransactionSummary(): void {
     console.log('Fetching data started...'),
-    this.transactionsService.getTransactionSummary(this.userId).subscribe(
-      {
-       
-        next: (response: ApiResponse<TransactionSummary>) => {
+      this.transactionsService.getTransactionSummary(this.userId).subscribe(
+        {
 
-          if (response.success) {
-            this.transactionSummary = response.data;
-            console.log('Fetching data started...')
+          next: (response: ApiResponse<TransactionSummary>) => {
+
+            if (response.success) {
+              this.transactionSummary = response.data;
+              console.log('Fetching data started...')
+            }
+
+          },
+          error: (error) => {
+
           }
-
-        },
-        error: (error) => {
-
         }
-      }
-    );
-   
+      );
+
   }
 
   getallTransactionCategories(): void {
@@ -156,9 +166,9 @@ export class DashboardComponent implements OnInit {
 
   // Function to change tabs
   setActiveTab(tab: string): void {
-  
+
     this.state.setActiveTab(tab);
-  
+
   }
 
   // Helper function to check if a tab is active
@@ -170,6 +180,7 @@ export class DashboardComponent implements OnInit {
 
   openPopup() {
     this.showAddTransactionForm.set(true);
+
   }
 
   onClosePopup() {

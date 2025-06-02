@@ -32,16 +32,6 @@ login(loginData: LoginUser): Observable<any> {
   }
 
 
-  // signUp(signUpData: any): Observable<any> {
-  //   return this.httpClient.post<any>(`${this.baseUrl}/auth/register`, signUpData).pipe(
-  //     tap((response: any) => {
-  //       if (response.success && response.data) {
-  //         this.saveToken(response.data); // Save the token
-  //       }
-  //     }),
-  //     catchError(this.handleError) // Handle errors
-  //   );
-  // }
   private saveToken(token: string): void {
     localStorage.setItem("auth", token);
   }

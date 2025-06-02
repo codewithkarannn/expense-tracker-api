@@ -7,6 +7,8 @@ import { catchError, of } from 'rxjs';
 import { Transaction, TransactionCategory, TransactionType } from '../../models/login-user';
 import { ApiResponse } from '../../models/api-reponse';
 import { TransactionStateService } from '../../services/transaction-state.service';
+import { Toast, ToastServiceService } from '../../services/toast-service.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-popup-add-transaction-form',
@@ -48,7 +50,7 @@ export class PopupAddTransactionFormComponent implements OnInit {
     deletedAt: null
   };
 
-  constructor( private transactionService: TransactionsService) {
+  constructor( private transactionService: TransactionsService , private toast :  ToastServiceService , private router: Router) {
    
   }
 
@@ -183,10 +185,20 @@ export class PopupAddTransactionFormComponent implements OnInit {
         this.transacctionState.triggerRefresh();
         this.formSubmit.emit(response.data);
         this.close();
+        
+         this.toast.show({
+          message: 'Added new transaction successful!',
+          type: 'success',
+          duration: 3000
+        });
       },
       error: (error) => {
         this.isSubmitting = false;
-        console.error('Error creating transaction:', error);
+         this.toast.show({
+          message: 'Error adding new transaction',
+          type: 'error',
+          duration: 3000
+        });
       }
     });
   }

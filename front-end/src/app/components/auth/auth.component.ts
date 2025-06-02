@@ -8,6 +8,7 @@ import { RegisterUser } from '../../models/register-user';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule, Loader2 } from 'lucide-angular';
+import { ToastServiceService } from '../../services/toast-service.service';
 
 @Component({
   selector: 'app-auth',
@@ -41,7 +42,9 @@ export class AuthComponent {
     lastName: "",
   }
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(private authService: AuthService, 
+    private router: Router,
+  private toast : ToastServiceService) {}
 
   toggleDarkMode() {
     this.isDarkMode = !this.isDarkMode;
@@ -57,10 +60,15 @@ export class AuthComponent {
     this.authService.login(this.loginUser).subscribe({
       next: (response: ApiResponse<any>) => {
         const token = response.data;
-        alert("Logged in successfully");
+      
         localStorage.setItem("auth_token", token);
         this.router.navigate(['/dashboard']);
         this.isLoading = false;
+        this.toast.show({
+          message: 'Login successful!',
+          type: 'success',
+          duration: 3000
+        });
       },
       error: err => {
         alert(err.error?.message || 'An error occurred during login.');
@@ -69,6 +77,7 @@ export class AuthComponent {
     });
   }
 
+  
   signUp(): void {
       this.isLoading = true;
     if (this.registerUser.password === this.registerUser.retype_password) {
