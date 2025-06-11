@@ -1,6 +1,7 @@
 @if(isVisible()) {
   <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" (click)="close()">
     <div class="relative bg-white rounded-lg shadow-lg p-6 w-full max-w-xl mx-4" (click)="$event.stopPropagation()">
+      <!-- Header -->
       <div class="flex w-full justify-between items-start mb-4">
         <div class="flex flex-col gap-1">
           <span class="text-xl font-bold text-gray-800">Add New Transaction</span>
@@ -13,9 +14,9 @@
         </button>
       </div>
 
-      <form (ngSubmit)="onSubmit()" class="space-y-4">
+      <form  class="space-y-4">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <!-- Type Dropdown -->
+          <!-- Type Dropdown (NOW SEARCHABLE) -->
           <div class="space-y-1">
             <label class="block text-sm font-medium text-gray-700">Type</label>
             <div class="relative">
@@ -24,24 +25,46 @@
                 (click)="toggleDropdown()"
                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-left flex justify-between items-center bg-white"
               >
-                {{ getSelectedTransactionType() || 'Select type' }}
-                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
+                <span class="truncate">{{ getSelectedTransactionType() || 'Select type' }}</span>
+                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" transform="rotate(90)">
+                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
                 </svg>
               </button>
               @if(dropdownOpen()) {
                 <div class="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg">
-                  <ul class="py-1">
-                    @for (type of transactionTypes(); track type.transactionTypeMasterId) {
-                      <li>
+                  <!-- ADD: Search input -->
+                  <div class="p-2">
+                    <input
+                      type="text"
+                      [(ngModel)]="typeSearchTerm"
+                      [ngModelOptions]="{standalone: true}"
+                      (click)="$event.stopPropagation()"
+                      placeholder="Search type..."
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                  </div>
+                  <ul class="py-1 max-h-60 overflow-y-auto">
+                    <!-- CHANGE: Iterate over the filtered list -->
+                    @for (type of filteredTransactionTypes(); track type.transactionTypeMasterId) {
+                      <li class="flex px-4 py-2  justify-between items-center  hover:bg-gray-100">
                         <button
                           type="button"
                           (click)="selectTransactionType(type.transactionTypeMasterId)"
-                          class="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm text-gray-700"
+                          class="w-full text-left   text-sm "
                         >
                           {{ type.transactionTypename }}
                         </button>
+                        <button class="text-red-500 bg-red-200 rounded-md w-14 hover:text-red-500 text-xs px-2 py-1  text-left" >
+                          Remove
+                        </button>
                       </li>
+                    } @empty {
+                      <div class="flex justify-between p-2 items-center">
+                      <li class="px-4 py-2 text-sm  flex flex-col">{{typeSearchTerm()}} <span class="text-xs  text-red-400 ">Not found</span>  </li>
+                      
+                      <button class="p-2 bg-black text-white text-xs rounded-md h-8 items-center flex hover:font-semibold " (click)="addNewType()">Add</button>
+                      </div>
+                      
                     }
                   </ul>
                 </div>
@@ -49,7 +72,7 @@
             </div>
           </div>
 
-          <!-- Category Dropdown -->
+          <!-- Category Dropdown (NOW SEARCHABLE) -->
           <div class="space-y-1">
             <label class="block text-sm font-medium text-gray-700">Category</label>
             <div class="relative">
@@ -58,15 +81,27 @@
                 (click)="toggleCategoryDropdown()"
                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-left flex justify-between items-center bg-white"
               >
-                {{ getSelectedCategory() || 'Select category' }}
-                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
+                <span class="truncate">{{ getSelectedCategory() || 'Select category' }}</span>
+                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" transform="rotate(90)">
+                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
                 </svg>
               </button>
               @if(categoryDropdownOpen()) {
                 <div class="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg">
-                  <ul class="py-1">
-                    @for (category of transactionCategories(); track category.transactionCategoryMasterId) {
+                   <!-- ADD: Search input -->
+                  <div class="p-2">
+                    <input
+                      type="text"
+                      [(ngModel)]="categorySearchTerm"
+                      [ngModelOptions]="{standalone: true}"
+                      (click)="$event.stopPropagation()"
+                      placeholder="Search category..."
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                  </div>
+                  <ul class="py-1 max-h-60 overflow-y-auto">
+                    <!-- CHANGE: Iterate over the filtered list -->
+                    @for (category of filteredTransactionCategories(); track category.transactionCategoryMasterId) {
                       <li>
                         <button
                           type="button"
@@ -76,6 +111,14 @@
                           {{ category.transactionCategoryName }}
                         </button>
                       </li>
+                    } @empty {
+                      <div class="flex justify-between p-2 items-center">
+                        <li class="px-4 py-2 text-sm  flex flex-col">{{categorySearchTerm()}} <span class="text-xs  text-red-400 ">Not
+                            found</span> </li>
+                      
+                        <button class="p-2 bg-black text-white rounded-md h-8 items-center flex hover:font-semibold " (click)="addNewCategory()"  >Add</button>
+                      </div>
+                      
                     }
                   </ul>
                 </div>
@@ -83,7 +126,9 @@
             </div>
           </div>
         </div>
-
+        
+        <!-- Rest of the form remains the same -->
+        <!-- Description, Amount, Date, Notes, Submit Button -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <!-- Description -->
           <div class="space-y-1">
@@ -91,8 +136,6 @@
             <input
               type="text"
               [(ngModel)]="transaction.transactionDescription"
-
-
               name="transactionDescription"
               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="e.g., Grocery Shopping"
@@ -119,19 +162,12 @@
         <!-- Date Picker -->
         <div class="space-y-1">
           <label class="block text-sm font-medium text-gray-700">Date</label>
-          <div class="relative">
-            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-              <svg class="w-4 h-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
-              </svg>
-            </div>
             <input
               type="date"
               [(ngModel)]="transaction.transactionDate"
               name="transactionDate"
-              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5"
+              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
             />
-          </div>
         </div>
 
         <!-- Notes Textarea -->
@@ -149,7 +185,8 @@
         <!-- Submit Button -->
         <div class="pt-2">
           <button
-            type="submit"
+            (click)="onSubmit()"
+      
             class="w-full bg-black hover:bg-black text-white font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Add Transaction

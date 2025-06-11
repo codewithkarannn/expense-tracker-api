@@ -1,10 +1,10 @@
-import { Component, inject, input, OnInit, output, signal } from '@angular/core';
+import { Component, computed, inject, input, OnInit, output, signal } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 import { TransactionsService } from '../../services/transactions.service';
 import { Observable } from 'rxjs/internal/Observable';
-import { catchError, of } from 'rxjs';
-import { Transaction, TransactionCategory, TransactionType } from '../../models/login-user';
+import { catchError, lastValueFrom, of } from 'rxjs';
+import { AddTransactionCategoryMasterDTO, AddTransactionTypeMasterDTO, Transaction, TransactionCategory, TransactionType } from '../../models/login-user';
 import { ApiResponse } from '../../models/api-reponse';
 import { TransactionStateService } from '../../services/transaction-state.service';
 import { Toast, ToastServiceService } from '../../services/toast-service.service';
@@ -28,11 +28,16 @@ export class PopupAddTransactionFormComponent implements OnInit {
   isSubmitting = false;
   transactionTypes = input<TransactionType[]>([]);
   transactionCategories = input<TransactionCategory[]>([]);
+  typeAdded = output<TransactionType>();
+  categoryAdded = output<TransactionCategory>();
   title = "Add Transaction";
   closePopup = output<void>();
   formSubmit = output<any>();
   dropdownOpen = signal(false);
   categoryDropdownOpen = signal(false);
+  typeSearchTerm = signal('');
+     // For Category Dropdown
+  categorySearchTerm = signal('');
 
   transaction: Transaction = {
     transactionMasterId: null,
@@ -57,6 +62,67 @@ export class PopupAddTransactionFormComponent implements OnInit {
   ngOnInit() {
     this.initializeTransaction();
 
+  }
+
+  filteredTransactionTypes = computed(() => {
+    const term = this.typeSearchTerm().toLowerCase();
+    if (!term) {
+      return this.transactionTypes();
+    }
+    return this.transactionTypes().filter(type =>
+      type.transactionTypename.toLowerCase().includes(term)
+    );
+  });
+
+  filteredTransactionCategories = computed(() => {
+    const term = this.categorySearchTerm().toLowerCase();
+    if (!term) {
+      return this.transactionCategories();
+    }
+    return this.transactionCategories().filter(category =>
+      category.transactionCategoryName.toLowerCase().includes(term)
+    );
+  });
+
+
+   
+  async addNewType() {
+    console.log('Adding new type:', this.typeSearchTerm());
+    if (!this.typeSearchTerm().trim()) return;
+    const newTypeDTO  : AddTransactionTypeMasterDTO =  { transactionTypename: this.typeSearchTerm(), userMasterId: this.transaction.userId , transactionTypeMasterId: null };
+    try {
+      const response = await lastValueFrom(this.transactionService.addTransactionType(newTypeDTO));
+      const newTypeFromApi = response.data;
+      console.log('New type added:', newTypeFromApi);
+
+      // CHANGE: Instead of updating a local signal, emit the new type to the parent.
+      this.typeAdded.emit(newTypeFromApi);
+      
+      // Now select the new item. The parent will update the list, and it will flow back down.
+      this.selectTransactionType(newTypeFromApi.transactionTypeMasterId);
+    } catch (error) {
+      console.error('Failed to add transaction type', error);
+    }
+  }
+
+    
+  async addNewCategory() {
+    console.log('Adding new category:', this.categorySearchTerm());
+    if (!this.categorySearchTerm().trim()) return;
+    const newTypeDTO  : AddTransactionCategoryMasterDTO =  { transactionCategoryName: this.categorySearchTerm(), userMasterId: this.transaction.userId , transactionCategoryMasterId: null };
+    try {
+      const response = await lastValueFrom(this.transactionService.addTransactionCategory(newTypeDTO));
+      const newTypeFromApi = response.data;
+      
+      console.log('New type added:', newTypeFromApi);
+      // CHANGE: Instead of updating a local signal, emit the new type to the parent.
+      this.categoryAdded.emit(newTypeFromApi);
+      
+      // Now select the new item. The parent will update the list, and it will flow back down.
+      this.selectCategory(newTypeFromApi.transactionCategoryMasterId);
+    } catch (error) {
+      console.error('Failed to add transaction type', error);
+    }
   }
 
   toggleDropdown() {

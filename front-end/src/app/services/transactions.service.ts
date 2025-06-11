@@ -3,7 +3,7 @@ import {catchError, Observable, throwError} from 'rxjs';
 
 import {HttpClient, HttpErrorResponse} from '@angular/common/http';
 import {ApiResponse} from '../models/api-reponse';
-import { Transaction, TransactionCategory, TransactionSummary, TransactionType } from '../models/login-user';
+import { AddTransactionCategoryMasterDTO, AddTransactionTypeMasterDTO, Transaction, TransactionCategory, TransactionSummary, TransactionType } from '../models/login-user';
 @Injectable({
   providedIn: 'root'
 })
@@ -18,10 +18,52 @@ export class TransactionsService {
 
   }
 
+
+  
+
+   addTransactionCategory(category: AddTransactionCategoryMasterDTO): Observable<ApiResponse<TransactionCategory>> {
+    return this.httpClient.post<ApiResponse<TransactionCategory>>(`${this.baseUrl}/Transaction/addtransactioncategory`, category).pipe(
+      catchError(error => {
+        console.error('Error fetching transaction types:', error);
+        throw error; // Or handle it differently
+      })
+    );
+  }
+
+   addTransactionType(transactionType: AddTransactionTypeMasterDTO): Observable<ApiResponse<TransactionType>> {
+    return this.httpClient.post<ApiResponse<TransactionType>>(`${this.baseUrl}/Transaction/addtransactiontype`, transactionType).pipe(
+      catchError(error => {
+        console.error('Error fetching transaction types:', error);
+        throw error; // Or handle it differently
+      })
+    );
+  }
+
+  deleteTransactionType(transactionTypeId: number, userId: string): Observable<ApiResponse<void>> {
+    return this.httpClient.delete<ApiResponse<void>>(
+      `${this.baseUrl}/Transaction/deletetransactiontype/${transactionTypeId}`
+    ).pipe(
+      catchError(error => {
+        console.error('Error deleting transaction type:', error);
+        throw error; // Or handle it differently
+      })
+    );
+  }
+
+  deleteTransactionCategory(categoryId: number, userId: string): Observable<ApiResponse<void>> {
+    return this.httpClient.delete<ApiResponse<void>>(
+      `${this.baseUrl}/Transaction/deletetransactioncategory/${categoryId}`
+    ).pipe(
+      catchError(error => {
+        console.error('Error deleting transaction category:', error);
+        throw error; // Or handle it differently
+      })
+    );
+  }
   // Updated method with proper typing
-  getAllTransactionTypes(): Observable<ApiResponse<TransactionType[]>> {
+  getAllTransactionTypes(userId : string): Observable<ApiResponse<TransactionType[]>> {
     return this.httpClient.get<ApiResponse<TransactionType[]>>(
-      `${this.baseUrl}/Transaction/transactionTypes`
+      `${this.baseUrl}/Transaction/transactionTypes?userMasterID=${userId}`
     ).pipe(
       catchError(error => {
         console.error('Error fetching transaction types:', error);
@@ -73,9 +115,9 @@ export class TransactionsService {
     );
   }
 
-  getAllCategories(): Observable<ApiResponse<TransactionCategory[]>> {
+  getAllCategories(userid : string): Observable<ApiResponse<TransactionCategory[]>> {
     return this.httpClient.get<ApiResponse<TransactionCategory[]>>(
-      `${this.baseUrl}/Transaction/transactioncategories`
+      `${this.baseUrl}/Transaction/transactioncategories?userMasterID=${userid}`
     ).pipe(
       catchError(error => {
         console.error('Error fetching transaction cateogires:', error);

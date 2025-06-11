@@ -16,6 +16,19 @@ export interface TransactionCategory {
   transactionCategoryName: string;
 }
 
+
+export interface AddTransactionTypeMasterDTO {
+  transactionTypeMasterId: number | null;
+  userMasterId: string; // GUID is represented as string in TypeScript
+  transactionTypename: string | null; // Nullable string
+
+}
+
+export interface AddTransactionCategoryMasterDTO {
+  transactionCategoryMasterId: number | null;
+  transactionCategoryName: string; // Non-nullable (note the = null! in C#)
+  userMasterId: string;
+}
 export interface Transaction {
   transactionMasterId: string | null;
   userId: string;
@@ -67,3 +80,4 @@ export interface TransactionSummary {
   /** Percentage change in income */
   incomePercentageChange: string;
 }
+

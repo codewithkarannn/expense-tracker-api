@@ -41,15 +41,14 @@ export class DashboardComponent implements OnInit {
       this.activeTab = tab;
     });
 
-
-    this.getallTransactionTypes();
-    this.getallTransactionCategories();
     this.authToken = localStorage.getItem('auth_token');
     if (this.authToken != null) {
       this.userId = this.extractUserIdFromToken(this.authToken);
     }
     ;
     this.getTransactionSummary();
+    this.getallTransactionTypes();
+    this.getallTransactionCategories();
   }
   logout() {
     localStorage.removeItem('auth_token');
@@ -62,7 +61,9 @@ export class DashboardComponent implements OnInit {
   }
 
   getallTransactionTypes(): void {
-    this.transactionsService.getAllTransactionTypes().subscribe(
+    console.log('Fetching transaction types...');
+    console.log('User ID:', this.userId);
+    this.transactionsService.getAllTransactionTypes(this.userId).subscribe(
       {
         next: (response: ApiResponse<TransactionType[]>) => {
 
@@ -143,9 +144,32 @@ export class DashboardComponent implements OnInit {
       );
 
   }
+onCategoryAdded(category: TransactionCategory ){
 
-  getallTransactionCategories(): void {
-    this.transactionsService.getAllCategories().subscribe(
+    // Add the new category to the transactionCategories array
+    this.transactionCategories.push(category);
+    // Optionally, you can also show a success message or perform other actions
+    this.toast.show({
+      message: 'Category added successfully!',
+      type: 'success',
+      duration: 3000
+    });
+}
+
+onTypeAdded(type: TransactionType ){
+
+    // Add the new category to the transactionCategories array
+    this.transactionTypes.push(type);
+    // Optionally, you can also show a success message or perform other actions
+    this.toast.show({
+      message: 'Category added successfully!',
+      type: 'success',
+      duration: 3000
+    });
+}
+
+getallTransactionCategories(): void {
+    this.transactionsService.getAllCategories(this.userId).subscribe(
       {
         next: (response: ApiResponse<TransactionCategory[]>) => {
 
@@ -185,5 +209,7 @@ export class DashboardComponent implements OnInit {
 
   onClosePopup() {
     this.showAddTransactionForm.set(false);
+
+
   }
 }
