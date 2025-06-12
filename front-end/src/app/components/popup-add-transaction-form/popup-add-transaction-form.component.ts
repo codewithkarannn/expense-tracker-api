@@ -91,7 +91,7 @@ export class PopupAddTransactionFormComponent implements OnInit {
   async addNewType() {
     console.log('Adding new type:', this.typeSearchTerm());
     if (!this.typeSearchTerm().trim()) return;
-    const newTypeDTO  : AddTransactionTypeMasterDTO =  { transactionTypename: this.typeSearchTerm(), userMasterId: this.transaction.userId , transactionTypeMasterId: null };
+    const newTypeDTO  : AddTransactionTypeMasterDTO =  { transactionTypename: this.typeSearchTerm(), userMasterId: this.transaction.userId , transactionTypeMasterId: null  };
     try {
       const response = await lastValueFrom(this.transactionService.addTransactionType(newTypeDTO));
       const newTypeFromApi = response.data;
