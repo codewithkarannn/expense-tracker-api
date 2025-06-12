@@ -24,8 +24,10 @@
     (closePopup)="onClosePopup()"
     (categoryAdded)="onCategoryAdded($event)"
     (typeAdded)="onTypeAdded($event)"
-    [transactionTypes]="transactionTypes"
-    [transactionCategories]="transactionCategories">
+    [transactionTypes]="transactionTypes()"
+    (categoryRemoved)=" onCategoryRemoved($event)"
+    (typeRemoved)="onTypeRemoved($event)"
+    [transactionCategories]="transactionCategories()">
   </app-popup-add-transaction-form>
 
   <hr class="border-slate-100 border-1 mt-2">

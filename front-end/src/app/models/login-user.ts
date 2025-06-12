@@ -7,13 +7,15 @@ export interface LoginUser {
 export interface TransactionType {
   transactionTypeMasterId: number;
   transactionTypename: string;
-
+  isCustom : boolean ;
+ 
 }
 
 //Transaction category interface
 export interface TransactionCategory {
   transactionCategoryMasterId: number;
   transactionCategoryName: string;
+  isCustom: boolean;
 }
 
 

@@ -54,9 +54,12 @@
                         >
                           {{ type.transactionTypename }}
                         </button>
-                        <button class="text-red-500 bg-red-200 rounded-md w-14 hover:text-red-500 text-xs px-2 py-1  text-left" >
+                        @if(type.isCustom == true) {
+                        
+                        <button class="text-white bg-red-500 rounded-sm w-14  text-xs px-2 py-1  text-left" (click)="removeType(type.transactionTypeMasterId)">
                           Remove
                         </button>
+                        }
                       </li>
                     } @empty {
                       <div class="flex justify-between p-2 items-center">
@@ -102,14 +105,20 @@
                   <ul class="py-1 max-h-60 overflow-y-auto">
                     <!-- CHANGE: Iterate over the filtered list -->
                     @for (category of filteredTransactionCategories(); track category.transactionCategoryMasterId) {
-                      <li>
+                      <li class="flex px-4 py-2  justify-between items-center  hover:bg-gray-100">
                         <button
                           type="button"
                           (click)="selectCategory(category.transactionCategoryMasterId)"
-                          class="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm text-gray-700"
+                       
                         >
                           {{ category.transactionCategoryName }}
                         </button>
+                        @if(category.isCustom == true) {
+                        
+                        <button class="text-white bg-red-500 rounded-sm w-14  text-xs px-2 py-1  text-left" (click)="removeCategory(category.transactionCategoryMasterId)">
+                          Remove
+                        </button>
+                        }
                       </li>
                     } @empty {
                       <div class="flex justify-between p-2 items-center">

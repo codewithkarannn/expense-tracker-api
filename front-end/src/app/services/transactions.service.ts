@@ -39,9 +39,9 @@ export class TransactionsService {
     );
   }
 
-  deleteTransactionType(transactionTypeId: number, userId: string): Observable<ApiResponse<void>> {
-    return this.httpClient.delete<ApiResponse<void>>(
-      `${this.baseUrl}/Transaction/deletetransactiontype/${transactionTypeId}`
+  deleteTransactionType(transactionTypeId: number): Observable<ApiResponse<unknown>> {
+    return this.httpClient.delete<ApiResponse<any>>(
+      `${this.baseUrl}/Transaction/deletetransactiontype/?transactionTypeMasterId=${transactionTypeId}`
     ).pipe(
       catchError(error => {
         console.error('Error deleting transaction type:', error);
@@ -50,9 +50,9 @@ export class TransactionsService {
     );
   }
 
-  deleteTransactionCategory(categoryId: number, userId: string): Observable<ApiResponse<void>> {
-    return this.httpClient.delete<ApiResponse<void>>(
-      `${this.baseUrl}/Transaction/deletetransactioncategory/${categoryId}`
+  deleteTransactionCategory(categoryId: number): Observable<ApiResponse<unknown>> {
+    return this.httpClient.delete<ApiResponse<any>>(
+      `${this.baseUrl}/Transaction/deletetransactioncategory/?transactionCategoryMasterId=${categoryId}`
     ).pipe(
       catchError(error => {
         console.error('Error deleting transaction category:', error);

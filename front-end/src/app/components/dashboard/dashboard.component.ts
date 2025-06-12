@@ -25,9 +25,9 @@ import { Router } from '@angular/router';
 })
 
 export class DashboardComponent implements OnInit {
-  transactionTypes = <TransactionType[]>([]);
+  transactionTypes = signal<TransactionType[]>([]);
   transactionSummary = <TransactionSummary>{};
-  transactionCategories = <TransactionCategory[]>([]);
+  transactionCategories = signal<TransactionCategory[]>([]);
   state = inject(TransactionStateService);
   showAddTransactionForm = signal(false);
   activeTab: string = 'overview'; // Default active tab
@@ -68,7 +68,7 @@ export class DashboardComponent implements OnInit {
         next: (response: ApiResponse<TransactionType[]>) => {
 
           if (response.success) {
-            this.transactionTypes = response.data;
+            this.transactionTypes.set(response.data);
 
           }
 
@@ -144,37 +144,43 @@ export class DashboardComponent implements OnInit {
       );
 
   }
-onCategoryAdded(category: TransactionCategory ){
+  onCategoryAdded(category: TransactionCategory) {
 
-    // Add the new category to the transactionCategories array
-    this.transactionCategories.push(category);
+    
+    this.transactionCategories.update(currentCategories => {
+      // The update function must return the new value for the signal
+      return [...currentCategories, category];
+    });
     // Optionally, you can also show a success message or perform other actions
     this.toast.show({
       message: 'Category added successfully!',
       type: 'success',
       duration: 3000
     });
-}
+  }
 
-onTypeAdded(type: TransactionType ){
-
+  onTypeAdded(type: TransactionType) {
+    type.isCustom  = true;
     // Add the new category to the transactionCategories array
-    this.transactionTypes.push(type);
+    this.transactionTypes.update(currentTypes => {
+      // The update function must return the new value for the signal
+      return [...currentTypes, type];
+    });
     // Optionally, you can also show a success message or perform other actions
     this.toast.show({
       message: 'Category added successfully!',
       type: 'success',
       duration: 3000
     });
-}
+  }
 
-getallTransactionCategories(): void {
+  getallTransactionCategories(): void {
     this.transactionsService.getAllCategories(this.userId).subscribe(
       {
         next: (response: ApiResponse<TransactionCategory[]>) => {
 
           if (response.success) {
-            this.transactionCategories = response.data;
+            this.transactionCategories.set(response.data);
             console.log("transaction:", this.transactionCategories);
           }
 
@@ -186,6 +192,20 @@ getallTransactionCategories(): void {
     );
   }
 
+  onCategoryRemoved(categoryId: number): void {
+   
+    this.transactionCategories.update(currentCategories =>
+      currentCategories.filter(category => category.transactionCategoryMasterId !== categoryId));
+  }
+
+  onTypeRemoved(typeId: number): void {
+    // Remove the type from the transactionCategories array
+    this.transactionTypes.update(currentTypes =>
+      currentTypes.filter(type => type.transactionTypeMasterId !== typeId)
+
+
+    );
+  }
 
 
   // Function to change tabs

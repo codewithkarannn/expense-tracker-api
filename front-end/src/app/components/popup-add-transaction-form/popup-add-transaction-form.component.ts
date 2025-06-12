@@ -30,6 +30,8 @@ export class PopupAddTransactionFormComponent implements OnInit {
   transactionCategories = input<TransactionCategory[]>([]);
   typeAdded = output<TransactionType>();
   categoryAdded = output<TransactionCategory>();
+  typeRemoved = output<number>();
+  categoryRemoved = output<number>();
   title = "Add Transaction";
   closePopup = output<void>();
   formSubmit = output<any>();
@@ -125,6 +127,8 @@ export class PopupAddTransactionFormComponent implements OnInit {
     }
   }
 
+
+
   toggleDropdown() {
     this.dropdownOpen.update(open => !open);
     this.categoryDropdownOpen.set(false);
@@ -164,6 +168,75 @@ export class PopupAddTransactionFormComponent implements OnInit {
       this.transaction.transactionCategory = category.transactionCategoryName;
     }
     this.categoryDropdownOpen.set(false);
+  }
+
+   removeType(typeId: number) {
+    console.log('Removing type with ID:', typeId);
+     this.transactionService.deleteTransactionType(typeId).subscribe(
+      {
+        next: (response: ApiResponse<any>) => {
+
+          if (response.success) {
+            // Optionally, you can also show a success message or perform other actions
+            this.toast.show({
+              message: 'Type removed successfully!',
+              type: 'success',
+              duration: 3000
+            });
+
+            this.typeRemoved.emit(typeId);
+          }
+
+        },
+        error: (error) => {
+          console.error('Error removing type:', error);
+          this.toast.show({
+            message: 'Error removing type',
+            type: 'error',
+            duration: 3000
+          });
+        }
+      }
+    );
+
+
+    
+
+    this.typeRemoved.emit(typeId);
+  }
+
+   removeCategory(categoryId: number) {
+ 
+    this.transactionService.deleteTransactionCategory(categoryId).subscribe(
+      {
+        next: (response: ApiResponse<any>) => {
+
+          if (response.success) {
+            // Optionally, you can also show a success message or perform other actions
+            this.toast.show({
+              message: 'Category removed successfully!',
+              type: 'success',
+              duration: 3000
+            });
+
+            this.categoryRemoved.emit(categoryId);
+          }
+
+        },
+        error: (error) => {
+          console.error('Error removing category:', error);
+          this.toast.show({
+            message: 'Error removing category',
+            type: 'error',
+            duration: 3000
+          });
+
+        }
+      }
+    );
+
+
+    this.categoryRemoved.emit(categoryId);
   }
 
   initializeTransaction(): void {
