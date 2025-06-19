@@ -18,6 +18,13 @@ export interface TransactionCategory {
   isCustom: boolean;
 }
 
+export interface TransactionPaymentMode {
+  paymentModeId: number | null; // Nullable number  
+  paymentMode: string;
+  isActive: number; // sbyte in C# is a signed byte (0-255), represented as number in TypeScript
+  userMasterId: string | null; // Guid in C# maps to string in TypeScript
+  isCustom: boolean;
+}
 
 export interface AddTransactionTypeMasterDTO {
   transactionTypeMasterId: number | null;
@@ -33,11 +40,14 @@ export interface AddTransactionCategoryMasterDTO {
 }
 export interface Transaction {
   transactionMasterId: string | null;
+
   userId: string;
   transactionTypeMasterId: number;
   transactionCategoryMasterId: number;
   transactionDescription: string;
   transactionAmount: number;
+  transactionPaymentModeId: number | null; // Nullable number for payment mode ID
+  transactionPaymentMode: string; // Payment mode as a string
   transactionDate: Date | string;
   transactionNote: string;
   isActive: number;

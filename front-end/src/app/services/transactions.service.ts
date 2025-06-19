@@ -3,7 +3,7 @@ import {catchError, Observable, throwError} from 'rxjs';
 
 import {HttpClient, HttpErrorResponse} from '@angular/common/http';
 import {ApiResponse} from '../models/api-reponse';
-import { AddTransactionCategoryMasterDTO, AddTransactionTypeMasterDTO, Transaction, TransactionCategory, TransactionSummary, TransactionType } from '../models/login-user';
+import { AddTransactionCategoryMasterDTO, AddTransactionTypeMasterDTO, Transaction, TransactionCategory, TransactionPaymentMode, TransactionSummary, TransactionType } from '../models/login-user';
 @Injectable({
   providedIn: 'root'
 })
@@ -30,6 +30,15 @@ export class TransactionsService {
     );
   }
 
+
+  addTransactionPayementMode(paymentMode: TransactionPaymentMode): Observable<ApiResponse<TransactionPaymentMode>> {
+    return this.httpClient.post<ApiResponse<TransactionPaymentMode>>(`${this.baseUrl}/Transaction/addtransactionpaymentmode`, paymentMode).pipe(
+      catchError(error => {
+        console.error('Error fetching transaction types:', error);
+        throw error; // Or handle it differently
+      })
+    );
+  }
    addTransactionType(transactionType: AddTransactionTypeMasterDTO): Observable<ApiResponse<TransactionType>> {
     return this.httpClient.post<ApiResponse<TransactionType>>(`${this.baseUrl}/Transaction/addtransactiontype`, transactionType).pipe(
       catchError(error => {
@@ -60,10 +69,32 @@ export class TransactionsService {
       })
     );
   }
+
+    deleteTransactionPaymentMode(paymentModeId: number): Observable<ApiResponse<unknown>> {
+    return this.httpClient.delete<ApiResponse<any>>(
+      `${this.baseUrl}/Transaction/deletetransactionpaymentmode/?transactionCategoryMasterId=${paymentModeId}`
+    ).pipe(
+      catchError(error => {
+        console.error('Error deleting transaction payment mode:', error);
+        throw error; // Or handle it differently
+      })
+    );
+  }
   // Updated method with proper typing
   getAllTransactionTypes(userId : string): Observable<ApiResponse<TransactionType[]>> {
     return this.httpClient.get<ApiResponse<TransactionType[]>>(
       `${this.baseUrl}/Transaction/transactionTypes?userMasterID=${userId}`
+    ).pipe(
+      catchError(error => {
+        console.error('Error fetching transaction types:', error);
+        throw error; // Or handle it differently
+      })
+    );
+  }
+
+getAllTransactionPaymentModes(userId : string): Observable<ApiResponse<TransactionPaymentMode[]>> {
+    return this.httpClient.get<ApiResponse<TransactionPaymentMode[]>>(
+      `${this.baseUrl}/Transaction/transactionPaymentModes?userMasterID=${userId}`
     ).pipe(
       catchError(error => {
         console.error('Error fetching transaction types:', error);

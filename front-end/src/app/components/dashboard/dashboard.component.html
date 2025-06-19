@@ -22,12 +22,17 @@
     [isVisible]="showAddTransactionForm()"
     [title]="'Enter Your Details'"
     (closePopup)="onClosePopup()"
+    (formSubmit)="onTransactionAdded()"
     (categoryAdded)="onCategoryAdded($event)"
     (typeAdded)="onTypeAdded($event)"
+    (paymentModeAdded)="onPaymentModeAdded($event)"
     [transactionTypes]="transactionTypes()"
     (categoryRemoved)=" onCategoryRemoved($event)"
+    
     (typeRemoved)="onTypeRemoved($event)"
-    [transactionCategories]="transactionCategories()">
+    (paymentModeRemoved)="onPaymentModeRemoved($event)"
+    [transactionCategories]="transactionCategories()"
+    [transactionPaymentMode]="transactionPaymentMode()">
   </app-popup-add-transaction-form>
 
   <hr class="border-slate-100 border-1 mt-2">
@@ -134,7 +139,11 @@
   <!-- Tab Content -->
   <div>
     @if (isTabActive('overview')) {
-      <app-overview [userId]="userId"></app-overview>
+      <app-overview 
+      [userId]="userId"
+      (navigateToAllTransaction)="navigateToAllTransactions()"
+      
+      ></app-overview>
     } @else if (isTabActive('transaction')) {
       <app-all-transactions [userId]="userId"></app-all-transactions>
     }

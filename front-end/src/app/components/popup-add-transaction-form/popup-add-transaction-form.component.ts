@@ -4,7 +4,7 @@ import { AuthService } from '../../services/auth.service';
 import { TransactionsService } from '../../services/transactions.service';
 import { Observable } from 'rxjs/internal/Observable';
 import { catchError, lastValueFrom, of } from 'rxjs';
-import { AddTransactionCategoryMasterDTO, AddTransactionTypeMasterDTO, Transaction, TransactionCategory, TransactionType } from '../../models/login-user';
+import { AddTransactionCategoryMasterDTO, AddTransactionTypeMasterDTO, Transaction, TransactionCategory, TransactionPaymentMode, TransactionType } from '../../models/login-user';
 import { ApiResponse } from '../../models/api-reponse';
 import { TransactionStateService } from '../../services/transaction-state.service';
 import { Toast, ToastServiceService } from '../../services/toast-service.service';
@@ -28,18 +28,23 @@ export class PopupAddTransactionFormComponent implements OnInit {
   isSubmitting = false;
   transactionTypes = input<TransactionType[]>([]);
   transactionCategories = input<TransactionCategory[]>([]);
+  transactionPaymentMode = input<TransactionPaymentMode[]>([]);
   typeAdded = output<TransactionType>();
   categoryAdded = output<TransactionCategory>();
+  paymentModeAdded = output<TransactionPaymentMode>();
   typeRemoved = output<number>();
   categoryRemoved = output<number>();
+  paymentModeRemoved = output<number>();
   title = "Add Transaction";
   closePopup = output<void>();
   formSubmit = output<any>();
   dropdownOpen = signal(false);
   categoryDropdownOpen = signal(false);
+  paymentmodeDropdownOpen = signal(false);
   typeSearchTerm = signal('');
      // For Category Dropdown
   categorySearchTerm = signal('');
+  payementModeSearchTerm = signal('');
 
   transaction: Transaction = {
     transactionMasterId: null,
@@ -51,6 +56,9 @@ export class PopupAddTransactionFormComponent implements OnInit {
     transactionNote: "",
     transactionType: "",
     transactionTypeMasterId: 0,
+    transactionPaymentModeId: null,
+    transactionPaymentMode: "",
+    
     userId:  '',
     createdAt: "",
     isActive: 0,
@@ -86,6 +94,15 @@ export class PopupAddTransactionFormComponent implements OnInit {
     );
   });
 
+  filteredTransactionPaymentMode = computed(() => {
+    const term = this.payementModeSearchTerm().toLowerCase();
+    if (!term) {
+      return this.transactionPaymentMode();
+    }
+    return this.transactionPaymentMode().filter(i =>
+      i.paymentMode.toLowerCase().includes(term)
+    );
+  });
 
    
   async addNewType() {
@@ -127,16 +144,41 @@ export class PopupAddTransactionFormComponent implements OnInit {
     }
   }
 
+async addPaymentMode() {
+    console.log('Adding new payment mode:', this.payementModeSearchTerm());
+    if (!this.payementModeSearchTerm().trim()) return;
+    const newPaymentDTO  : TransactionPaymentMode =  { paymentMode: this.payementModeSearchTerm(), userMasterId: this.transaction.userId , paymentModeId: null , isActive: 1, isCustom: true };
+    try {
+      const response = await lastValueFrom(this.transactionService.addTransactionPayementMode(newPaymentDTO));
+      const newTypeFromApi = response.data;
+      
+      console.log('New type added:', newTypeFromApi);
+      // CHANGE: Instead of updating a local signal, emit the new type to the parent.
+      this.paymentModeAdded.emit(newTypeFromApi);
+      
+      // Now select the new item. The parent will update the list, and it will flow back down.
+      this.selectPaymentMode(newTypeFromApi.paymentModeId || 0); // Ensure we handle null paymentModeId
+    } catch (error) {
+      console.error('Failed to add transaction type', error);
+    }
+  }
 
 
   toggleDropdown() {
     this.dropdownOpen.update(open => !open);
     this.categoryDropdownOpen.set(false);
+    this.paymentmodeDropdownOpen.set(false);
+  }
+toggleModeDropdown() {
+    this.dropdownOpen.set(false);
+    this.categoryDropdownOpen.set(false);
+    this.paymentmodeDropdownOpen.update(open => !open);
   }
 
   toggleCategoryDropdown() {
     this.categoryDropdownOpen.update(open => !open);
     this.dropdownOpen.set(false);
+    this.paymentmodeDropdownOpen.set(false);
   }
 
   getSelectedTransactionType(): string {
@@ -151,6 +193,12 @@ export class PopupAddTransactionFormComponent implements OnInit {
     return category ? category.transactionCategoryName : '';
   }
 
+
+    getSelectedPaymentMode(): string {
+    const selectedId = this.transaction.transactionPaymentModeId;
+    const paymentMode = this.transactionPaymentMode().find(c => c.paymentModeId === selectedId);
+    return paymentMode ? paymentMode.paymentMode : '';
+  }
   selectTransactionType(typeId: number) {
     this.transaction.transactionTypeMasterId = typeId;
     this.transaction.transactionCategoryMasterId = 0;
@@ -168,6 +216,15 @@ export class PopupAddTransactionFormComponent implements OnInit {
       this.transaction.transactionCategory = category.transactionCategoryName;
     }
     this.categoryDropdownOpen.set(false);
+  }
+  selectPaymentMode(paymentModeId: number) {
+    this.transaction.transactionPaymentModeId = paymentModeId;
+    const paymentMode = this.transactionPaymentMode().find(c => c.paymentModeId === paymentModeId);
+    if (paymentMode) {
+      this.transaction.transactionPaymentMode = paymentMode.paymentMode;
+    }
+    this.categoryDropdownOpen.set(false);
+    this.paymentmodeDropdownOpen.set(false);
   }
 
    removeType(typeId: number) {
@@ -238,7 +295,39 @@ export class PopupAddTransactionFormComponent implements OnInit {
 
     this.categoryRemoved.emit(categoryId);
   }
+ removePaymentMode(paymentModeId: number) {
+ 
+    this.transactionService.deleteTransactionPaymentMode(paymentModeId).subscribe(
+      {
+        next: (response: ApiResponse<any>) => {
 
+          if (response.success) {
+            // Optionally, you can also show a success message or perform other actions
+            this.toast.show({
+              message: 'Payment mode removed successfully!',
+              type: 'success',
+              duration: 3000
+            });
+
+            this.paymentModeRemoved.emit(paymentModeId);
+          }
+
+        },
+        error: (error) => {
+          console.error('Error removing payment mode:', error);
+          this.toast.show({
+            message: 'Error removing payment mode',
+            type: 'error',
+            duration: 3000
+          });
+
+        }
+      }
+    );
+
+
+    this.paymentModeRemoved.emit(paymentModeId);
+  }
   initializeTransaction(): void {
     const authToken = localStorage.getItem('auth_token');
     
@@ -258,6 +347,8 @@ export class PopupAddTransactionFormComponent implements OnInit {
       transactionNote: "",
       transactionType: "",
       transactionTypeMasterId: 0,
+      transactionPaymentModeId: 0,
+      transactionPaymentMode: "",
       userId: userId,
       createdAt: new Date().toISOString(),
       isActive: 1,

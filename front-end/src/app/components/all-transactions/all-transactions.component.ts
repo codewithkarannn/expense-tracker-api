@@ -40,7 +40,7 @@ export class AllTransactionsComponent implements OnInit {
     this.getAllTransactions();
     this.transactionState.onRefresh$.subscribe(() => {
       if (this.isActive()) {
-        console.log('Refresh event received! 🔥');
+       
         this.getAllTransactions();
       }
     });

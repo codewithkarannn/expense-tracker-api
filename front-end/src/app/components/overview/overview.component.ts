@@ -1,4 +1,4 @@
-import { Component, inject, Inject, input, OnInit } from '@angular/core';
+import { Component, inject, Inject, input, OnInit, output } from '@angular/core';
 import { TransactionsService } from '../../services/transactions.service';
 import { Transaction } from '../../models/login-user';
 import { DatePipe, NgClass } from '@angular/common';
@@ -16,6 +16,7 @@ export class OverviewComponent implements OnInit {
   transactionCount : number = 0;
   isLoading: boolean = true;
   userId = input<string>('');
+  navigateToAllTransaction = output<void>();
   // Define your properties and methods here
   ngOnInit() {
     // Initialization logic here
@@ -44,6 +45,10 @@ export class OverviewComponent implements OnInit {
       
   }
 
+  navigateToAllTransactions(){
+    console.log("Navigating to all transactions");
+    this.navigateToAllTransaction.emit();
+  }
   getTransactionCount() {  
     if(this.userId != null && this.userId != undefined)
     {

@@ -2,7 +2,7 @@ import { Component, inject, input, OnInit, signal } from '@angular/core';
 import { PopupAddTransactionFormComponent } from '../popup-add-transaction-form/popup-add-transaction-form.component';
 import { TransactionsService } from '../../services/transactions.service';
 import { ApiResponse } from '../../models/api-reponse';
-import { TransactionCategory, TransactionType, Transaction, TransactionSummary } from '../../models/login-user';
+import { TransactionCategory, TransactionType, Transaction, TransactionSummary, TransactionPaymentMode } from '../../models/login-user';
 import { OverviewComponent } from '../overview/overview.component';
 import { NgClass } from '@angular/common';
 import { AllTransactionsComponent } from '../all-transactions/all-transactions.component';
@@ -28,6 +28,7 @@ export class DashboardComponent implements OnInit {
   transactionTypes = signal<TransactionType[]>([]);
   transactionSummary = <TransactionSummary>{};
   transactionCategories = signal<TransactionCategory[]>([]);
+  transactionPaymentMode = signal<TransactionPaymentMode[]>([]);
   state = inject(TransactionStateService);
   showAddTransactionForm = signal(false);
   activeTab: string = 'overview'; // Default active tab
@@ -49,6 +50,7 @@ export class DashboardComponent implements OnInit {
     this.getTransactionSummary();
     this.getallTransactionTypes();
     this.getallTransactionCategories();
+    this.getallTransactionPaymentMode();
   }
   logout() {
     localStorage.removeItem('auth_token');
@@ -174,6 +176,21 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+    onPaymentModeAdded(paymentMode: TransactionPaymentMode) {
+    paymentMode.isCustom  = true;
+    // Add the new category to the transactionCategories array
+    this.transactionPaymentMode.update(currentTypes => {
+      // The update function must return the new value for the signal
+      return [...currentTypes, paymentMode];
+    });
+    // Optionally, you can also show a success message or perform other actions
+    this.toast.show({
+      message: 'Category added successfully!',
+      type: 'success',
+      duration: 3000
+    });
+  }
+
   getallTransactionCategories(): void {
     this.transactionsService.getAllCategories(this.userId).subscribe(
       {
@@ -192,6 +209,30 @@ export class DashboardComponent implements OnInit {
     );
   }
 
+   getallTransactionPaymentMode(): void {
+    this.transactionsService.getAllTransactionPaymentModes(this.userId).subscribe(
+      {
+        next: (response: ApiResponse<TransactionPaymentMode[]>) => {
+
+          if (response.success) {
+            this.transactionPaymentMode.set(response.data);
+            console.log("transaction payment mode:", this.transactionPaymentMode());
+          }
+
+        },
+        error: (error) => {
+
+        }
+      }
+    );
+  }
+
+
+onTransactionAdded(){
+  this.getTransactionSummary();
+
+}
+
   onCategoryRemoved(categoryId: number): void {
    
     this.transactionCategories.update(currentCategories =>
@@ -207,6 +248,14 @@ export class DashboardComponent implements OnInit {
     );
   }
 
+  onPaymentModeRemoved(paymentModeId: number): void {
+
+    this.transactionPaymentMode.update(currentTypes =>
+      currentTypes.filter(type => type.paymentModeId !== paymentModeId)
+
+
+    );
+  }
 
   // Function to change tabs
   setActiveTab(tab: string): void {
@@ -220,6 +269,9 @@ export class DashboardComponent implements OnInit {
     return this.activeTab === tab;
   }
 
+navigateToAllTransactions() {
+  this.setActiveTab('transaction');
+}
 
 
   openPopup() {
@@ -229,7 +281,5 @@ export class DashboardComponent implements OnInit {
 
   onClosePopup() {
     this.showAddTransactionForm.set(false);
-
-
   }
 }
