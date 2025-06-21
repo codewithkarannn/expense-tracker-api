@@ -1,143 +1,114 @@
 <!-- Filter Bar -->
-
-
 <div class="bg-white rounded-md border w-full p-4 border-slate-200 mb-4">
-  <!-- Mobile: 2x2 grid, Desktop: flex row -->
-  <div class="grid grid-cols-2 gap-4 md:flex md:flex-row">
-    <!-- First column in mobile grid -->
-    <div class="space-y-4 col-span-2 md:flex md:space-y-0 md:gap-2 md:w-10/12">
-      <!-- Date Range (stacked vertically in mobile, horizontal in desktop) -->
-      <div class="grid grid-cols-2 gap-4 md:flex md:gap-2 md:w-full">
-        <div class="flex flex-col gap-2">
-          <label class="block text-xs font-semibold text-gray-600">Start Date</label>
-          <input type="date" [(ngModel)]="filterStartDate" class="border border-slate-200 rounded px-3 py-2 text-sm" />
-        </div>
-        <div class="flex flex-col gap-2">
-          <label class="block text-xs font-semibold text-gray-600">End Date</label>
-          <input type="date" [(ngModel)]="filterEndDate" class="border border-slate-200 rounded px-3 py-2 text-sm" />
-        </div>
-      </div>
-
-      <!-- Type and Category (2x1 in mobile, horizontal in desktop) -->
-      <div class="grid grid-cols-2 gap-4 md:flex md:gap-2 md:w-full">
-        <div class="flex flex-col gap-2">
-          <label class="block text-xs font-semibold text-gray-600">Type</label>
-          <select [(ngModel)]="filterType" class="border border-slate-200 rounded px-3 py-2 text-sm">
-            <option value="">All</option>
-            <option value="Income">Income</option>
-            <option value="Expense">Expense</option>
-          </select>
-        </div>
-        <div class="flex flex-col gap-2">
-          <label class="block text-xs font-semibold text-gray-600">Category</label>
-          <select [(ngModel)]="filterCategory" class="border border-slate-200 rounded px-3 py-2 text-sm">
-            <option value="">All</option>
-            <option *ngFor="let category of categoryList" [value]="category">{{ category }}</option>
-          </select>
-        </div>
-      </div>
+  <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+    <!-- Filters -->
+    <div class="flex flex-col gap-1">
+      <label class="block text-xs font-semibold text-gray-600">Start Date</label>
+      <input type="date" [(ngModel)]="filterStartDate" class="w-full border border-slate-200 rounded px-3 py-1.5 text-sm" />
     </div>
-
-    <!-- Second column in mobile grid -->
-    <div class="space-y-4 col-span-2 md:flex md:space-y-0 md:gap-2 md:w-10/12">
-      <!-- Amount Range (2x1 in mobile, horizontal in desktop) -->
-      <div class="grid grid-cols-2 gap-4 md:flex md:gap-2 md:w-full">
-        <div class="flex flex-col gap-2">
-          <label class="block text-xs font-semibold text-gray-600">Min Amount</label>
-          <input type="number" [(ngModel)]="minAmount" class="border border-slate-200 rounded px-3 py-2 text-sm" />
-        </div>
-        <div class="flex flex-col gap-2">
-          <label class="block text-xs font-semibold text-gray-600">Max Amount</label>
-          <input type="number" [(ngModel)]="maxAmount" class="border border-slate-200 rounded px-3 py-2 text-sm" />
-        </div>
-      </div>
-
-      <!-- Search (full width in mobile, normal in desktop) -->
-      <div class="col-span-2 md:w-4/12">
-        <div class="flex flex-col gap-2">
-          <label class="block text-xs font-semibold text-gray-600">Search</label>
-          <input type="text" [(ngModel)]="searchText" placeholder="Description..." 
-                class="border border-slate-200 rounded px-3 py-2 text-sm" />
-        </div>
-      </div>
+    <div class="flex flex-col gap-1">
+      <label class="block text-xs font-semibold text-gray-600">End Date</label>
+      <input type="date" [(ngModel)]="filterEndDate" class="w-full border border-slate-200 rounded px-3 py-1.5 text-sm" />
+    </div>
+    <div class="flex flex-col gap-1">
+      <label class="block text-xs font-semibold text-gray-600">Type</label>
+      <select [(ngModel)]="filterType" class="w-full border border-slate-200 rounded px-3 py-1.5 text-sm bg-white">
+        <option value="">All Types</option>
+        @for (type of transactionTypes(); track type.transactionTypeMasterId) {
+          <option [value]="type.transactionTypename">{{ type.transactionTypename }}</option>
+        }
+      </select>
+    </div>
+    <div class="flex flex-col gap-1">
+      <label class="block text-xs font-semibold text-gray-600">Category</label>
+      <select [(ngModel)]="filterCategory" class="w-full border border-slate-200 rounded px-3 py-1.5 text-sm bg-white">
+        <option value="">All Categories</option>
+        @for (category of transactionCategories(); track category.transactionCategoryMasterId) {
+          <option [value]="category.transactionCategoryName">{{ category.transactionCategoryName }}</option>
+        }
+      </select>
+    </div>
+    <div class="flex flex-col gap-1 col-span-2 sm:col-span-1">
+      <label class="block text-xs font-semibold text-gray-600">Min Amount</label>
+      <input type="number" [(ngModel)]="minAmount" placeholder="0.00" class="w-full border border-slate-200 rounded px-3 py-1.5 text-sm" />
+    </div>
+    <div class="flex flex-col gap-1 col-span-2 sm:col-span-1">
+      <label class="block text-xs font-semibold text-gray-600">Max Amount</label>
+      <input type="number" [(ngModel)]="maxAmount" placeholder="e.g., 500" class="w-full border border-slate-200 rounded px-3 py-1.5 text-sm" />
+    </div>
+    <div class="col-span-2 md:col-span-4 lg:col-span-full">
+      <label class="block text-xs font-semibold text-gray-600">Search Description</label>
+      <input type="text" [(ngModel)]="searchText" placeholder="Search by description..." 
+             class="w-full border border-slate-200 rounded px-3 py-1.5 text-sm" />
     </div>
   </div>
 </div>
-<!-- Table -->
-<div class="">
-  <!-- Sticky Header -->
-  <table class="  w-full table-fixed divide-y divide-gray-200">
-    <thead class="bg-gray-50 sticky top-0 z-10">
-      <tr>
-        <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" (click)="sortTransactions('transactionDate')">
-          Date
-          @if(sortColumn === 'transactionDate') {
-            <span>{{ sortDirection === 'asc' ? '⬆️' : '⬇️' }}</span>
-          }
-        </th>
-        <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ">Description</th>
-        <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-        <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-        <th class="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" (click)="sortTransactions('transactionAmount')">
-          Amount
-          @if(sortColumn === 'transactionAmount') {
-            <span>{{ sortDirection === 'asc' ? '⬆️' : '⬇️' }}</span>
-          }
-        </th>
-      </tr>
-    </thead>
-  </table>
 
-  <!-- Scrollable Body -->
-  <div class="max-h-96 overflow-y-auto">
-    <table class="w-full table-fixed divide-y divide-gray-200">
+<!-- Table -->
+<div class="border rounded-md border-slate-200 overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="w-1/6 px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" (click)="sortTransactions('transactionDate')">
+            Date
+            @if(sortColumn === 'transactionDate') { <span class="text-base align-middle">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span> }
+          </th>
+          <th class="w-2/6 px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+          <th class="w-1/6 px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+          <th class="w-1/6 px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment Mode</th>
+          <th class="w-1/6 px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" (click)="sortTransactions('transactionAmount')">
+            Amount
+            @if(sortColumn === 'transactionAmount') { <span class="text-base align-middle">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span> }
+          </th>
+        </tr>
+      </thead>
       <tbody class="bg-white divide-y divide-gray-200">
         @if (isLoading) {
-          @for (i of [1,2,3,4,5]; track i) {
+          @for (i of [1,2,3,4,5,6,7]; track i) {
             <tr>
-              <td class="px-3 py-3"><div class="h-4 w-16 bg-gray-200 rounded animate-pulse"></div></td>
-              <td class="px-3 py-3"><div class="h-4 w-32 bg-gray-200 rounded animate-pulse mb-1"></div><div class="h-3 w-24 bg-gray-200 rounded animate-pulse"></div></td>
-              <td class="px-3 py-3"><div class="h-6 w-20 bg-gray-200 rounded-full animate-pulse"></div></td>
-              <td class="px-3 py-3"><div class="h-4 w-16 bg-gray-200 rounded animate-pulse"></div></td>
-              <td class="px-3 py-3"><div class="h-4 w-12 bg-gray-200 rounded animate-pulse"></div></td>
+              <td class="px-3 py-3 whitespace-nowrap"><div class="h-4 w-20 bg-gray-200 rounded animate-pulse"></div></td>
+              <td class="px-3 py-3">
+                <div class="h-4 w-32 bg-gray-200 rounded animate-pulse mb-1"></div>
+                <div class="h-3 w-24 bg-gray-200 rounded animate-pulse"></div>
+              </td>
+              <td class="px-3 py-3 whitespace-nowrap"><div class="h-6 w-24 bg-gray-200 rounded-full animate-pulse"></div></td>
+              <td class="px-3 py-3 whitespace-nowrap"><div class="h-4 w-20 bg-gray-200 rounded animate-pulse"></div></td>
+              <td class="px-3 py-3 whitespace-nowrap text-right"><div class="h-4 w-16 bg-gray-200 rounded animate-pulse ml-auto"></div></td>
             </tr>
           }
         } @else {
           @for(transaction of filteredTransactions; track transaction.transactionMasterId) {
             <tr>
-              <td class="px-3 py-3 text-sm text-gray-500">{{ transaction.transactionDate | date:'MMM dd, yyyy' }}</td>
+              <td class="px-3 py-3 text-sm text-gray-500 whitespace-nowrap">{{ transaction.transactionDate | date:'MMM dd, yyyy' }}</td>
               <td class="px-3 py-3 text-sm text-gray-900">
-                {{ transaction.transactionDescription }}
+                <span class="font-medium">{{ transaction.transactionDescription }}</span>
                 @if(transaction.transactionNote) {
                   <span class="block text-xs text-gray-500">{{ transaction.transactionNote }}</span>
                 }
               </td>
-              <td class="px-3 py-3 text-sm">
-                <span class="px-2 py-1 inline-flex text-xs text-left font-semibold rounded-full"
-                      [ngClass]="{
-                        'bg-green-100 text-green-800': transaction.transactionCategoryMasterId === 1,
-                        'bg-blue-100 text-blue-800': transaction.transactionCategoryMasterId === 2,
-                        'bg-purple-100 text-purple-800': transaction.transactionCategoryMasterId === 3,
-                        'bg-yellow-100 text-yellow-800': transaction.transactionCategoryMasterId === 4,
-                        'bg-red-100 text-red-800': transaction.transactionCategoryMasterId === 5,
-                        'bg-gray-100 text-gray-800': !transaction.transactionCategoryMasterId
-                      }">
+              <td class="px-3 py-3 text-sm whitespace-nowrap">
+                <!-- THE ONLY CHANGE IS HERE: Using the dynamic styling function -->
+                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full"
+                      [ngClass]="getCategoryStyles(transaction.transactionCategoryMasterId)">
                   {{ transaction.transactionCategory || 'Uncategorized' }}
                 </span>
               </td>
-              <td class="px-3 py-3 text-sm text-gray-500 text-left">{{ transaction.transactionType }}</td>
-              <td class="px-3 py-3 text-sm font-medium text-right"
+              <td class="px-3 py-3 text-sm text-gray-500 whitespace-nowrap">{{ transaction.transactionPaymentMode || "N/A" }}</td>
+              <td class="px-3 py-3 text-sm font-medium text-right whitespace-nowrap"
                   [ngClass]="{
                     'text-green-600': transaction.transactionTypeMasterId === 1,
                     'text-red-600': transaction.transactionTypeMasterId !== 1
                   }">
-                {{ transaction.transactionTypeMasterId === 1 ? '+' : '-' }}{{ transaction.transactionAmount }}
+                {{ transaction.transactionTypeMasterId === 1 ? '+' : '-' }}{{ transaction.transactionAmount | number:'1.2-2' }}
               </td>
             </tr>
           }
           @empty {
             <tr>
-              <td colspan="5" class="text-center py-3 text-sm text-gray-500">No transactions found</td>
+              <td colspan="5" class="text-center py-8 text-sm text-gray-500">
+                No transactions match the current filters.
+              </td>
             </tr>
           }
         }

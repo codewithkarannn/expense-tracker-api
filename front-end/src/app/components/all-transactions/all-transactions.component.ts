@@ -1,6 +1,6 @@
-import { DatePipe, NgClass } from '@angular/common';
+import { CommonModule, DatePipe, NgClass } from '@angular/common';
 import { Component, inject, input, NgModule, OnInit } from '@angular/core';
-import { Transaction } from '../../models/login-user';
+import { Transaction, TransactionCategory, TransactionPaymentMode, TransactionType } from '../../models/login-user';
 import { TransactionsService } from '../../services/transactions.service';
 import { TransactionStateService } from '../../services/transaction-state.service';
 import { Subject, takeUntil } from 'rxjs';
@@ -9,7 +9,7 @@ import { FormsModule, NgModel } from '@angular/forms';
 @Component({
   selector: 'app-all-transactions',
   standalone: true,
-  imports: [NgClass, DatePipe , FormsModule],
+  imports: [NgClass, DatePipe, FormsModule, CommonModule],
   templateUrl: './all-transactions.component.html',
   styleUrl: './all-transactions.component.css'
 })
@@ -20,8 +20,20 @@ export class AllTransactionsComponent implements OnInit {
 
   isLoading = true;
   userId = input<string>('');
+  transactionTypes = input<TransactionType[]>();
+  transactionCategories = input<TransactionCategory[]>();
+  transactionPaymentMode = input<TransactionPaymentMode[]>([]);
   transactionList: Transaction[] = [];
-
+  private colorPalette = [
+    { bg: 'bg-blue-100', text: 'text-blue-800' },
+    { bg: 'bg-green-100', text: 'text-green-800' },
+    { bg: 'bg-purple-100', text: 'text-purple-800' },
+    { bg: 'bg-yellow-100', text: 'text-yellow-800' },
+    { bg: 'bg-indigo-100', text: 'text-indigo-800' },
+    { bg: 'bg-pink-100', text: 'text-pink-800' },
+    { bg: 'bg-teal-100', text: 'text-teal-800' },
+  ];
+  private categoryColorMap = new Map<number, { bg: string, text: string }>();
   // Filters
   filterStartDate: string = '';
   filterEndDate: string = '';
@@ -34,13 +46,13 @@ export class AllTransactionsComponent implements OnInit {
   sortColumn: string = '';
   sortDirection: 'asc' | 'desc' = 'asc';
 
-  categoryList: string[] = ['Food', 'Travel', 'Rent', 'Shopping', 'Bills']; // Populate based on actual data if needed
+
 
   ngOnInit(): void {
     this.getAllTransactions();
     this.transactionState.onRefresh$.subscribe(() => {
       if (this.isActive()) {
-       
+
         this.getAllTransactions();
       }
     });
@@ -105,12 +117,25 @@ export class AllTransactionsComponent implements OnInit {
   get filteredTransactions(): Transaction[] {
     return this.transactionList.filter(tx => {
       return (!this.filterStartDate || new Date(tx.transactionDate) >= new Date(this.filterStartDate)) &&
-             (!this.filterEndDate || new Date(tx.transactionDate) <= new Date(this.filterEndDate)) &&
-             (!this.filterType || tx.transactionType === this.filterType) &&
-             (!this.filterCategory || tx.transactionCategory === this.filterCategory) &&
-             (!this.minAmount || tx.transactionAmount >= this.minAmount) &&
-             (!this.maxAmount || tx.transactionAmount <= this.maxAmount) &&
-             (!this.searchText || tx.transactionDescription?.toLowerCase().includes(this.searchText.toLowerCase()));
+        (!this.filterEndDate || new Date(tx.transactionDate) <= new Date(this.filterEndDate)) &&
+        (!this.filterType || tx.transactionType === this.filterType) &&
+        (!this.filterCategory || tx.transactionCategory === this.filterCategory) &&
+        (!this.minAmount || tx.transactionAmount >= this.minAmount) &&
+        (!this.maxAmount || tx.transactionAmount <= this.maxAmount) &&
+        (!this.searchText || tx.transactionDescription?.toLowerCase().includes(this.searchText.toLowerCase()));
     });
+  }
+    public getCategoryStyles(categoryId?: number): { [key: string]: boolean } {
+    if (categoryId === undefined || categoryId === null) {
+      return { 'bg-gray-100': true, 'text-gray-800': true };
+    }
+    if (this.categoryColorMap.has(categoryId)) {
+      const colors = this.categoryColorMap.get(categoryId)!;
+      return { [colors.bg]: true, [colors.text]: true };
+    }
+    const colorIndex = this.categoryColorMap.size % this.colorPalette.length;
+    const newColor = this.colorPalette[colorIndex];
+    this.categoryColorMap.set(categoryId, newColor);
+    return { [newColor.bg]: true, [newColor.text]: true };
   }
 }

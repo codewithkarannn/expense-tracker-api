@@ -145,7 +145,13 @@
       
       ></app-overview>
     } @else if (isTabActive('transaction')) {
-      <app-all-transactions [userId]="userId"></app-all-transactions>
+      <app-all-transactions 
+      [userId]="userId"
+      [transactionCategories]="transactionCategories()"
+      [transactionTypes]="transactionTypes()"
+      [transactionPaymentMode]="transactionPaymentMode()"
+      
+      ></app-all-transactions>
     }
   </div>
 </div>

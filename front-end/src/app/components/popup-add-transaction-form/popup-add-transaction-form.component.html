@@ -1,3 +1,4 @@
+
 @if(isVisible()) {
 <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" (click)="close()">
   <div class="relative bg-white rounded-lg shadow-lg p-6 w-full max-w-xl mx-4" (click)="$event.stopPropagation()">
@@ -16,13 +17,18 @@
       </button>
     </div>
 
-    <form class="space-y-4">
+    <!-- UPDATE: Added #transactionForm and (ngSubmit) -->
+    <form #transactionForm="ngForm" (ngSubmit)="onSubmit()" class="space-y-4">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <!-- Type Dropdown (NOW SEARCHABLE) -->
+        <!-- Type Dropdown (NOW SEARCHABLE & VALIDATED) -->
         <div class="space-y-1">
-          <label class="block text-sm font-medium text-gray-700">Type</label>
+          <!-- UPDATE: Added required indicator -->
+          <label class="block text-sm font-medium text-gray-700">Type <span class="text-red-500">*</span></label>
+          <!-- UPDATE: Hidden input for validation -->
+          <input type="hidden" [(ngModel)]="transaction.transactionTypeMasterId" name="transactionTypeMasterId" required
+            #type="ngModel">
           <div class="relative">
-            <button type="button" (click)="toggleDropdown()"
+            <button type="button" (click)="toggleDropdown()" [class.border-red-500]="type.invalid && type.touched"
               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-left flex justify-between items-center bg-white">
               <span class="truncate">{{ getSelectedTransactionType() || 'Select type' }}</span>
               <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -30,7 +36,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4" />
               </svg>
             </button>
-            @if(dropdownOpen()) {
+             @if(dropdownOpen()) {
             <div class="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg">
               <!-- ADD: Search input -->
               <div class="p-2">
@@ -68,13 +74,22 @@
             </div>
             }
           </div>
+          <!-- UPDATE: Validation message -->
+          @if (type.invalid && type.touched) {
+          <p class="text-red-500 text-xs mt-1">Type is required.</p>
+          }
         </div>
 
-        <!-- Category Dropdown (NOW SEARCHABLE) -->
+        <!-- Category Dropdown (NOW SEARCHABLE & VALIDATED) -->
         <div class="space-y-1">
-          <label class="block text-sm font-medium text-gray-700">Category</label>
+          <!-- UPDATE: Added required indicator -->
+          <label class="block text-sm font-medium text-gray-700">Category <span class="text-red-500">*</span></label>
+          <!-- UPDATE: Hidden input for validation -->
+          <input type="hidden" [(ngModel)]="transaction.transactionCategoryMasterId" name="transactionCategoryMasterId"
+            required #category="ngModel">
           <div class="relative">
             <button type="button" (click)="toggleCategoryDropdown()"
+              [class.border-red-500]="category.invalid && category.touched"
               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-left flex justify-between items-center bg-white">
               <span class="truncate">{{ getSelectedCategory() || 'Select category' }}</span>
               <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -82,6 +97,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4" />
               </svg>
             </button>
+            @if(categoryDropdownOpen()) {
             @if(categoryDropdownOpen()) {
             <div class="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg">
               <!-- ADD: Search input -->
@@ -119,45 +135,76 @@
               </ul>
             </div>
             }
+            }
           </div>
+          <!-- UPDATE: Validation message -->
+          @if (category.invalid && category.touched) {
+          <p class="text-red-500 text-xs mt-1">Category is required.</p>
+          }
         </div>
       </div>
 
-      <!-- Rest of the form remains the same -->
-      <!-- Description, Amount, Date, Notes, Submit Button -->
+
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <!-- Description -->
         <div class="space-y-1">
-          <label class="block text-sm font-medium text-gray-700">Description</label>
-          <input type="text" [(ngModel)]="transaction.transactionDescription" name="transactionDescription"
+          <!-- UPDATE: Added required indicator -->
+          <label class="block text-sm font-medium text-gray-700">Description <span class="text-red-500">*</span></label>
+          <!-- UPDATE: Added required, name, #description, and validation class -->
+          <input type="text" [(ngModel)]="transaction.transactionDescription" name="transactionDescription" required
+            #description="ngModel"
+            [class.border-red-500]="description.invalid && (description.dirty || description.touched)"
             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="e.g., Grocery Shopping" />
+          <!-- UPDATE: Validation message -->
+          @if (description.invalid && (description.dirty || description.touched)) {
+          <p class="text-red-500 text-xs mt-1">Description is required.</p>
+          }
         </div>
 
         <!-- Amount -->
         <div class="space-y-1">
-          <label class="block text-sm font-medium text-gray-700">Amount</label>
+          <!-- UPDATE: Added required indicator -->
+          <label class="block text-sm font-medium text-gray-700">Amount <span class="text-red-500">*</span></label>
           <div class="relative">
-            <input type="number" [(ngModel)]="transaction.transactionAmount" name="transactionAmount"
+            <!-- UPDATE: Added required, name, #amount, min, and validation class -->
+            <input type="number" [(ngModel)]="transaction.transactionAmount" name="transactionAmount" required
+              min="0.01" #amount="ngModel"
+              [class.border-red-500]="amount.invalid && (amount.dirty || amount.touched)"
               class="w-full pl-4 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="0.00" step="0.01" min="0" />
+              placeholder="0.00" step="0.01" />
           </div>
+          <!-- UPDATE: Validation message -->
+          @if (amount.invalid && (amount.dirty || amount.touched)) {
+          @if(amount.errors?.['required']) {
+          <p class="text-red-500 text-xs mt-1">Amount is required.</p>
+          }
+          @if(amount.errors?.['min']) {
+          <p class="text-red-500 text-xs mt-1">Amount must be greater than 0.</p>
+          }
+          }
         </div>
       </div>
 
-      <!-- Date Picker -->
-     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-  <div class="space-y-1">
-          <label class="block text-sm font-medium text-gray-700">Payment mode</label>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Payment Mode Dropdown (VALIDATED) -->
+        <div class="space-y-1">
+          <!-- UPDATE: Added required indicator -->
+          <label class="block text-sm font-medium text-gray-700">Payment mode <span class="text-red-500">*</span></label>
+          <!-- UPDATE: Hidden input for validation -->
+          <input type="hidden" [(ngModel)]="transaction.transactionPaymentModeId" name="paymentModeId" required
+            #paymentMode="ngModel">
           <div class="relative">
             <button type="button" (click)="toggleModeDropdown()"
+              [class.border-red-500]="paymentMode.invalid && paymentMode.touched"
               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-left flex justify-between items-center bg-white">
-              <span class="truncate">{{ getSelectedPaymentMode() || 'Select type' }}</span>
+              <span class="truncate">{{ getSelectedPaymentMode() || 'Select mode' }}</span>
               <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                 transform="rotate(90)">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4" />
               </svg>
             </button>
+            @if(paymentmodeDropdownOpen()) {
             @if(paymentmodeDropdownOpen()) {
             <div class="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg">
               <!-- ADD: Search input -->
@@ -195,18 +242,30 @@
               </ul>
             </div>
             }
+            }
           </div>
+          <!-- UPDATE: Validation message -->
+          @if (paymentMode.invalid && paymentMode.touched) {
+          <p class="text-red-500 text-xs mt-1">Payment mode is required.</p>
+          }
         </div>
 
-      <div class="space-y-1  ">
-        <label class="block text-sm font-medium text-gray-700">Date</label>
-        <input type="date" [(ngModel)]="transaction.transactionDate" name="transactionDate"
-          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" />
+        <!-- Date Picker -->
+        <div class="space-y-1">
+          <!-- UPDATE: Added required indicator -->
+          <label class="block text-sm font-medium text-gray-700">Date <span class="text-red-500">*</span></label>
+          <!-- UPDATE: Added required, name, #date, and validation class -->
+          <input type="date" [(ngModel)]="transaction.transactionDate" name="transactionDate" required #date="ngModel"
+            [class.border-red-500]="date.invalid && (date.dirty || date.touched)"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" />
+          <!-- UPDATE: Validation message -->
+          @if (date.invalid && (date.dirty || date.touched)) {
+          <p class="text-red-500 text-xs mt-1">Date is required.</p>
+          }
+        </div>
       </div>
 
-     </div>
-      
-      <!-- Notes Textarea -->
+      <!-- Notes Textarea (Optional) -->
       <div class="space-y-1">
         <label class="block text-sm font-medium text-gray-700">Notes</label>
         <textarea [(ngModel)]="transaction.transactionNote" name="transactionNote" rows="3"
@@ -216,7 +275,8 @@
 
       <!-- Submit Button -->
       <div class="pt-2">
-        <button (click)="onSubmit()"
+        <!-- UPDATE: Changed to type="submit" and added [disabled] binding -->
+        <button type="submit" [disabled]="transactionForm.invalid"
           class="w-full bg-black hover:bg-black text-white font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed">
           Add Transaction
         </button>

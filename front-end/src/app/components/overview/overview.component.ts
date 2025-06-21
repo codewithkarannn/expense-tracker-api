@@ -17,6 +17,20 @@ export class OverviewComponent implements OnInit {
   isLoading: boolean = true;
   userId = input<string>('');
   navigateToAllTransaction = output<void>();
+
+    private colorPalette = [
+    { bg: 'bg-blue-100', text: 'text-blue-800' },
+    { bg: 'bg-green-100', text: 'text-green-800' },
+    { bg: 'bg-purple-100', text: 'text-purple-800' },
+    { bg: 'bg-yellow-100', text: 'text-yellow-800' },
+    { bg: 'bg-indigo-100', text: 'text-indigo-800' },
+    { bg: 'bg-pink-100', text: 'text-pink-800' },
+    { bg: 'bg-teal-100', text: 'text-teal-800' },
+  ];
+
+   private categoryColorMap = new Map<number, { bg: string, text: string }>();
+
+
   // Define your properties and methods here
   ngOnInit() {
     // Initialization logic here
@@ -66,5 +80,22 @@ export class OverviewComponent implements OnInit {
       );
     }
       
+  }
+
+    public getCategoryStyles(categoryId?: number): { [key: string]: boolean } {
+    if (categoryId === undefined || categoryId === null) {
+      return { 'bg-gray-100': true, 'text-gray-800': true };
+    }
+
+    if (this.categoryColorMap.has(categoryId)) {
+      const colors = this.categoryColorMap.get(categoryId)!;
+      return { [colors.bg]: true, [colors.text]: true };
+    }
+
+    const colorIndex = this.categoryColorMap.size % this.colorPalette.length;
+    const newColor = this.colorPalette[colorIndex];
+    this.categoryColorMap.set(categoryId, newColor);
+    
+    return { [newColor.bg]: true, [newColor.text]: true };
   }
 }
