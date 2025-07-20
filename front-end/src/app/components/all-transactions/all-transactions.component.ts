@@ -3,8 +3,9 @@ import { Component, inject, input, NgModule, OnInit } from '@angular/core';
 import { Transaction, TransactionCategory, TransactionPaymentMode, TransactionType } from '../../models/login-user';
 import { TransactionsService } from '../../services/transactions.service';
 import { TransactionStateService } from '../../services/transaction-state.service';
-import { Subject, takeUntil } from 'rxjs';
+import { debounceTime, distinctUntilChanged, Subject, takeUntil } from 'rxjs';
 import { FormsModule, NgModel } from '@angular/forms';
+import { PaginatedResponse, TransactionRequestParams } from '../../models/api-reponse';
 
 @Component({
   selector: 'app-all-transactions',
@@ -17,6 +18,7 @@ export class AllTransactionsComponent implements OnInit {
   private transactionService = inject(TransactionsService);
   private transactionState = inject(TransactionStateService);
   private destroy$ = new Subject<void>();
+  private searchSubject = new Subject<string>();
 
   isLoading = true;
   userId = input<string>('');
@@ -44,18 +46,35 @@ export class AllTransactionsComponent implements OnInit {
   searchText: string = '';
 
   sortColumn: string = '';
-  sortDirection: 'asc' | 'desc' = 'asc';
+  sortDirection: 'asc' | 'desc' = 'desc';
+   currentPage = 1;
+  pageSize = 10;
+  totalItems = 0;
+  totalPages = 0;
 
 
 
   ngOnInit(): void {
-    this.getAllTransactions();
-    this.transactionState.onRefresh$.subscribe(() => {
-      if (this.isActive()) {
+    // this.getAllTransactions();
+    // this.transactionState.onRefresh$.subscribe(() => {
+    //   if (this.isActive()) {
 
-        this.getAllTransactions();
-      }
+    //     this.getAllTransactions();
+    //   }
+    // });
+    this.fetchTransactions(); // Initial data fetch
+
+    this.transactionState.onRefresh$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      if (this.isActive()) { this.fetchTransactions(); }
     });
+
+    // Debounce search input to avoid excessive API calls on every keystroke
+    this.searchSubject.pipe(
+      debounceTime(400),
+      distinctUntilChanged(),
+      
+      takeUntil(this.destroy$)
+    ).subscribe(() => this.onFilterChange());
   }
 
   isActive(): boolean {
@@ -79,15 +98,15 @@ export class AllTransactionsComponent implements OnInit {
       });
   }
 
-  sortTransactions(column: string) {
-    if (this.sortColumn === column) {
-      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
-    } else {
-      this.sortColumn = column;
-      this.sortDirection = 'asc';
-    }
-    this.applySort();
-  }
+  // sortTransactions(column: string) {
+  //   if (this.sortColumn === column) {
+  //     this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+  //   } else {
+  //     this.sortColumn = column;
+  //     this.sortDirection = 'asc';
+  //   }
+  //   this.applySort();
+  // }
 
   applySort() {
     if (!this.sortColumn) return;
@@ -138,4 +157,76 @@ export class AllTransactionsComponent implements OnInit {
     this.categoryColorMap.set(categoryId, newColor);
     return { [newColor.bg]: true, [newColor.text]: true };
   }
+
+
+    fetchTransactions(): void {
+    this.isLoading = true;
+    const params: TransactionRequestParams = {
+      Page: this.currentPage,
+      PageSize: this.pageSize,
+      SortColumn: this.sortColumn,
+      SortDirection: this.sortDirection,
+      FilterType: this.filterType,
+      FilterCategory: this.filterCategory,
+      StartDate: this.filterStartDate,
+      EndDate: this.filterEndDate,
+      MinAmount: this.minAmount,
+      MaxAmount: this.maxAmount,
+      SearchText: this.searchText
+    };
+
+    // MODIFIED: Call the new paginated service method
+    this.transactionService.getAllPaginatedTransactions(this.userId(), params)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response: PaginatedResponse<Transaction>) => {
+          this.transactionList = response.data;
+          this.currentPage = response.currentPage;
+          this.pageSize = response.pageSize;
+          this.totalItems = response.totalItems;
+          this.totalPages = response.totalPages;
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Error loading transactions', error);
+          this.isLoading = false;
+        }
+      });
+
+      
+  }
+
+    sortTransactions(column: string): void {
+    if (this.sortColumn === column) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortColumn = column;
+      this.sortDirection = 'asc';
+    }
+    this.fetchTransactions();
+  }
+
+   onFilterChange(): void {
+    this.currentPage = 1;
+    this.fetchTransactions();
+  }
+ onSearchChange(): void {
+    this.searchSubject.next(this.searchText);
+  }
+ goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages && page !== this.currentPage) {
+      this.currentPage = page;
+      this.fetchTransactions();
+    }
+  }
+
+    onPageSizeChange(): void {
+    this.currentPage = 1; // Reset to page 1 is crucial
+    this.fetchTransactions();
+  }
+  get paginationPages(): number[] {
+    // This is a simple implementation. For many pages, you'd want a more complex one.
+    return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+  }
+
 }
