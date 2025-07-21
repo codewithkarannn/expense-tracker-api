@@ -9,7 +9,7 @@ import {RegisterUser} from '../models/register-user';
   providedIn: 'root'
 })
 export class AuthService {
-  private baseUrl: string ="https://localhost:7238/api";
+  private baseUrl: string ="http://localhost:5034/api";
   // private tokenKey: string = " ";
   httpClient: HttpClient;
 

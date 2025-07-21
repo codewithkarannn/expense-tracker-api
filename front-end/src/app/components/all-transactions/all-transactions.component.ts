@@ -14,6 +14,7 @@ import { FormsModule, NgModel } from '@angular/forms';
   styleUrl: './all-transactions.component.css'
 })
 export class AllTransactionsComponent implements OnInit {
+
   private transactionService = inject(TransactionsService);
   private transactionState = inject(TransactionStateService);
   private destroy$ = new Subject<void>();
@@ -62,6 +63,18 @@ export class AllTransactionsComponent implements OnInit {
     return localStorage.getItem('active_tab') === 'all-transactions';
   }
 
+ deleteTransaction(transactionMasterId : string){
+    
+    this.transactionService.deleteTransaction(transactionMasterId).subscribe({
+      next: (response) => {
+        if(response.success)
+        {
+            this.getAllTransactions();
+        }
+      }
+    })
+
+  }
   private getAllTransactions() {
     this.isLoading = true;
     this.transactionService.getAllTransactions(this.userId())

@@ -16,6 +16,7 @@
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
           <tr>
+            <th></th>
             <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
             <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
             <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
@@ -42,6 +43,9 @@
             <!-- Actual Data Rows -->
             @for(transaction of transactionList; track transaction.transactionMasterId){
               <tr>
+                <td >
+                    <button type="button" (click)="deleteTransaction(transaction.transactionMasterId!)">Delete</button>
+                </td>
                 <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-500">
                   {{ transaction.transactionDate | date:'MMM d' }}
                 </td>

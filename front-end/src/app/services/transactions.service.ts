@@ -8,7 +8,7 @@ import { AddTransactionCategoryMasterDTO, AddTransactionTypeMasterDTO, Transacti
   providedIn: 'root'
 })
 export class TransactionsService {
-  private baseUrl: string ="https://localhost:7238/api";
+  private baseUrl: string ="http://localhost:5034/api";
   // private tokenKey: string = " ";
   httpClient: HttpClient;
 
@@ -19,7 +19,7 @@ export class TransactionsService {
   }
 
 
-  
+
 
    addTransactionCategory(category: AddTransactionCategoryMasterDTO): Observable<ApiResponse<TransactionCategory>> {
     return this.httpClient.post<ApiResponse<TransactionCategory>>(`${this.baseUrl}/Transaction/addtransactioncategory`, category).pipe(
@@ -51,6 +51,17 @@ export class TransactionsService {
   deleteTransactionType(transactionTypeId: number): Observable<ApiResponse<unknown>> {
     return this.httpClient.delete<ApiResponse<any>>(
       `${this.baseUrl}/Transaction/deletetransactiontype/?transactionTypeMasterId=${transactionTypeId}`
+    ).pipe(
+      catchError(error => {
+        console.error('Error deleting transaction type:', error);
+        throw error; // Or handle it differently
+      })
+    );
+  }
+
+  deleteTransaction(transactionMasterId: string): Observable<ApiResponse<unknown>> {
+    return this.httpClient.delete<ApiResponse<any>>(
+      `${this.baseUrl}/Transaction/deletetransaction/${transactionMasterId}`
     ).pipe(
       catchError(error => {
         console.error('Error deleting transaction type:', error);
@@ -119,7 +130,7 @@ getAllTransactionPaymentModes(userId : string): Observable<ApiResponse<Transacti
       `${this.baseUrl}/Transaction/transactionscount/${userid}/${numberOfMonths}`
     ).pipe(
       catchError(error => {
-        
+
         throw error; // Or handle it differently
       })
     );

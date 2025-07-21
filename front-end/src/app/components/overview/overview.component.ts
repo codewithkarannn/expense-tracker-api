@@ -38,6 +38,19 @@ export class OverviewComponent implements OnInit {
     this.getTransactionCount()
   }
 
+
+  deleteTransaction(transactionMasterId : string){
+    
+    this.transactionService.deleteTransaction(transactionMasterId).subscribe({
+      next: (response) => {
+        if(response.success)
+        {
+            this.getAllTransactions();
+        }
+      }
+    })
+
+  }
  
   getAllTransactions() {  
     if(this.userId != null && this.userId != undefined)
