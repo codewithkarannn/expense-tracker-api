@@ -8,7 +8,7 @@ import { AddTransactionCategoryMasterDTO, AddTransactionTypeMasterDTO, Transacti
   providedIn: 'root'
 })
 export class TransactionsService {
-  private baseUrl: string ="http://localhost:5034/api";
+  private baseUrl: string ="https://localhost:7238/api";
   // private tokenKey: string = " ";
   httpClient: HttpClient;
 
