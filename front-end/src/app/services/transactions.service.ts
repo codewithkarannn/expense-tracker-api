@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import {catchError, Observable, throwError} from 'rxjs';
 
 import {HttpClient, HttpErrorResponse} from '@angular/common/http';
-import {ApiResponse} from '../models/api-reponse';
+import {ApiResponse, PaginatedResponse, TransactionRequestParams} from '../models/api-reponse';
 import { AddTransactionCategoryMasterDTO, AddTransactionTypeMasterDTO, Transaction, TransactionCategory, TransactionPaymentMode, TransactionSummary, TransactionType } from '../models/login-user';
 @Injectable({
   providedIn: 'root'
@@ -196,5 +196,27 @@ getAllTransactionPaymentModes(userId : string): Observable<ApiResponse<Transacti
     // Return an observable with a user-friendly error message
     console.error('HTTP Error:', error); // Log the full error object
     return throwError(() => new Error(errorMessage));
+  }
+
+  getAllPaginatedTransactions(userId: string, params: TransactionRequestParams): Observable<PaginatedResponse<Transaction>> {
+    
+    // Create a clean object, removing any null, undefined, or empty string values
+    // as HttpClient might not ignore them all by default.
+    const cleanParams: { [param: string]: any } = {};
+    for (const key in params) {
+        // This is a type-safe way to access the key
+        const value = params[key as keyof TransactionRequestParams];
+        if (value !== null && value !== undefined && value !== '') {
+            cleanParams[key] = value;
+        }
+    }
+
+    // Pass the clean object directly to the `params` option.
+    // HttpClient will automatically convert it to a query string like:
+    // ?page=1&pageSize=10&sortColumn=transactionDate&...
+    return this.httpClient.get<PaginatedResponse<Transaction>>(
+      `${this.baseUrl}/Transaction/paginatedtransactions/${userId}`, 
+      { params: cleanParams }
+    );
   }
 }

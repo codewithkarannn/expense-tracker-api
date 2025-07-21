@@ -1,22 +1,43 @@
-import { Component, inject, Inject, input, OnInit, output } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, inject, Inject, input, OnInit, output, ViewChild } from '@angular/core';
 import { TransactionsService } from '../../services/transactions.service';
 import { Transaction } from '../../models/login-user';
 import { DatePipe, NgClass } from '@angular/common';
+import { LucideTrash } from 'lucide-angular';
 import { NgModel } from '@angular/forms';
+import Chart from 'chart.js/auto';
+import { ExpenseIncomeLineGraphComponent } from "../expense-income-line-graph/expense-income-line-graph.component";
+
 
 @Component({
   selector: 'app-overview',
-  imports: [DatePipe , NgClass],
+  imports: [DatePipe, NgClass, ExpenseIncomeLineGraphComponent],
   templateUrl: './overview.component.html',
   styleUrl: './overview.component.css'
 })
-export class OverviewComponent implements OnInit {
+export class OverviewComponent implements OnInit  {
+  
   private transactionService  =  inject(TransactionsService);
   transactionList : Transaction[] = [];
   transactionCount : number = 0;
   isLoading: boolean = true;
   userId = input<string>('');
   navigateToAllTransaction = output<void>();
+  public chartData = {
+    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+    
+    datasets: [{
+      label: 'Expense',
+      data: [120, 150, 180, 90, 210],
+      borderColor: 'green',
+      tension: 0.1
+    }]
+  };
+
+  // Property to hold the chart options
+  public chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false
+  };
 
     private colorPalette = [
     { bg: 'bg-blue-100', text: 'text-blue-800' },
@@ -35,7 +56,8 @@ export class OverviewComponent implements OnInit {
   ngOnInit() {
     // Initialization logic here
     this.getAllTransactions();
-    this.getTransactionCount()
+    this.getTransactionCount();
+    
   }
 
 
@@ -110,5 +132,10 @@ export class OverviewComponent implements OnInit {
     this.categoryColorMap.set(categoryId, newColor);
     
     return { [newColor.bg]: true, [newColor.text]: true };
+
+
+    
   }
+  
+
 }
