@@ -1,0 +1,277 @@
+/*
+ * GENERAL LAYOUT & TOP BAR
+ * Translates: mt-4, flex, w-full, justify-between, items-center, gap-2
+ */
+.top-bar {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  background-color: #ffffff;
+  z-index: 1000;
+  padding: 12px 0;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.top-bar-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+@media (min-width: 768px) {
+  .top-bar-content {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+.balance-skeleton {
+  width: 120px;
+  height: 14px !important;
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* Corresponds to gap-2 */
+}
+
+.total-balance-container {
+  margin-right: 1rem;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-name {
+  font-size: 0.875rem; /* Corresponds to text-sm */
+  font-weight: 600; /* Corresponds to font-semibold */
+}
+
+.user-email {
+  font-size: 0.75rem; /* Corresponds to text-xs */
+  color: #4b5563; /* A common gray for email text */
+}
+
+.top-bar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* Corresponds to gap-2 */
+}
+
+/*
+ * TOTAL BALANCE SECTION
+ * Translates: flex, flex-col, mr-4, justify-end, text-gray-500, font-bold, text-base
+ */
+.total-balance {
+  display: flex;
+  flex-direction: column;
+  margin-right: 1rem; /* Corresponds to mr-4 */
+}
+
+.balance-label {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  color: #6b7281; /* Corresponds to text-gray-500 */
+  font-size: 0.75rem; /* Corresponds to text-xs */
+}
+
+.balance-amount {
+  font-weight: 700; /* Corresponds to font-bold */
+  font-size: 1rem; /* Corresponds to text-base */
+}
+
+/*
+ * DIVIDER
+ * Translates: border-slate-100, border-1, mt-2
+ */
+.divider {
+  border: 0;
+  border-top: 1px solid #f1f5f9; /* Corresponds to border-slate-100 */
+  margin-top: 0.5rem; /* Corresponds to mt-2 */
+}
+
+
+/*
+ * SUMMARY CARDS CONTAINER
+ * Translates: flex, flex-col, md:flex-row, justify-between, gap-10
+ */
+.summary-cards-container {
+  display: flex;
+  flex-direction: column; /* Default for mobile */
+  justify-content: space-between;
+  gap: 2.5rem; /* Corresponds to gap-10 */
+}
+
+/*
+ * SUMMARY CARD & SKELETON
+ * Translates: w-full, md:w-1/3, rounded-xl, border, border-slate-200
+ */
+.summary-card {
+  width: 100%;
+  border-radius: 0.75rem !important; /* Corresponds to rounded-xl. !important to override component styles if needed */
+  border: 1px solid #e2e8f0 !important; /* Corresponds to border and border-slate-200 */
+}
+
+/* Since nz-card has its own body, we style its content to be centered */
+.summary-card .card-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  width: 100%;
+  height: 100%;
+}
+
+
+/*
+ * CARD CONTENT
+ * Translates: text-sm, sm:text-base, font-bold, text-xl, sm:text-2xl, mt-1, text-gray-500, text-xs
+ */
+.card-title {
+  font-size: 0.875rem; /* Corresponds to text-sm */
+}
+
+.card-amount {
+  font-weight: 700; /* Corresponds to font-bold */
+  font-size: 1.25rem; /* Corresponds to text-xl */
+  margin-top: 0.25rem; /* Corresponds to mt-1 */
+}
+
+.card-change {
+  color: #6b7281; /* Corresponds to text-gray-500 */
+  font-size: 0.75rem; /* Corresponds to text-xs */
+}
+
+/*
+ * RESPONSIVE MEDIA QUERIES
+ * Translates: sm: and md: prefixes from Tailwind
+ */
+
+/* Small screens and up (640px) */
+@media (min-width: 640px) {
+  .card-title {
+    font-size: 1rem; /* Corresponds to sm:text-base */
+  }
+  .card-amount {
+    font-size: 1.5rem; /* Corresponds to sm:text-2xl */
+  }
+}
+
+/* Medium screens and up (768px) */
+@media (min-width: 768px) {
+  .summary-cards-container {
+    flex-direction: row; /* Corresponds to md:flex-row */
+  }
+  .summary-card {
+    width: 33.333333%; /* Corresponds to md:w-1/3 */
+  }
+}
+
+
+/* TABS  Slider
+ * Translates: flex, flex-col, gap-4
+ */
+.animated-tab-toggle {
+  position: relative;
+  display: flex;
+  border-radius: 8px;
+  overflow: hidden;
+  width: fit-content;
+  margin-bottom: 10px;
+  margin-top: 20px;
+  
+  background-color: #f0f0f0;
+}
+
+.animated-tab-toggle .tab-button {
+  flex: 1;
+  padding: 8px 18px;
+
+  
+  background: transparent;
+  z-index: 1;
+  cursor: pointer;
+  font-size: 14px;
+  color: #595959;
+  transition: color 0.3s ease;
+  position: relative;
+}
+
+.animated-tab-toggle .tab-button.active {
+  color: #1677ff;
+  font-weight: 600;
+  
+}
+
+.animated-tab-toggle .slider {
+  position: absolute;
+  border: #1677ff 2px solid;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: left 0.3s ease;
+  z-index: 0;
+}
+
+.animated-tab-toggle .slider.right {
+  left: 50%;
+}
+.animated-tab-toggle .slider.left {
+  left: 0;
+}
+.desktop-only {
+  display: block;
+}
+
+.mobile-only {
+  display: none;
+}
+
+/* On screens smaller than 768px (phones) */
+@media (max-width: 768px) {
+  .desktop-only {
+    display: none;
+  }
+
+  .mobile-only {
+    display: block;
+  }
+
+  .mobile-only .total-balance-container {
+    text-align: center;
+    padding: 12px 0;
+  }
+}
+.total-balance-card {
+  background: linear-gradient(to right, #3b82f6, #9333ea); /* Blue to Purple */
+  color: white;
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.total-balance-content {
+  padding: 1.2rem 1.5rem;
+}
+
+.total-balance-content .label {
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.total-balance-content .amount {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-top: 0.3rem;
+  display: block;
+}

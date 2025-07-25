@@ -1,214 +1,133 @@
 <!-- auth.component.html -->
 <div class="min-h-screen flex items-center justify-center p-4 bg-white">
-    <div class="w-full max-w-md mx-auto bg-white rounded-lg shadow-md">
-      <div class="p-6 space-y-4">
-        <div class="text-center">
-          <h1 class="text-2xl font-bold text-black">Welcome</h1>
-          <p class="text-gray-500">Login or create an account to continue</p>
-        </div>
-  
-        <div class="flex border-b border-gray-200">
-          <button
-            type="button"
-            class="flex-1 py-2.5 px-4 text-sm font-medium text-center"
-            [class.text-black]="isToggleLogin"
-            [class.text-gray-500]="!isToggleLogin"
-            [class.border-b-2]="isToggleLogin"
-            [class.border-black]="isToggleLogin"
-            (click)="isToggleLogin = true"
-          >
-            Login
-          </button>
-          <button
-            type="button"
-            class="flex-1 py-2.5 px-4 text-sm font-medium text-center"
-            [class.text-black]="!isToggleLogin"
-            [class.text-gray-500]="isToggleLogin"
-            [class.border-b-2]="!isToggleLogin"
-            [class.border-black]="!isToggleLogin"
-            (click)="isToggleLogin = false"
-          >
-            Sign Up
-          </button>
-        </div>
-  
-        <div *ngIf="isToggleLogin" class="space-y-4 ">
-          <form (ngSubmit)="login()" class="flex flex-col gap-4">
-            <div class="space-y-2">
-              <label for="login-email" class="block text-sm font-medium text-black">Email</label>
-              <input
-                type="email"
-                id="login-email"
-                class="bg-gray-50 border border-gray-300 text-black sm:text-sm rounded-lg focus:ring-black focus:border-black block w-full p-2.5"
-                placeholder="name@example.com"
-                [(ngModel)]="loginUser.userEmail"
-                name="userEmail"
-                required
-              >
-            </div>
-  
-            <div class="space-y-2">
-              <div class="flex items-center justify-between">
-                <label for="login-password" class="block text-sm font-medium text-black">Password</label>
-                <a href="#" class="text-sm text-black hover:underline">Forgot password?</a>
-              </div>
-              <div class="relative">
-                <input
-                  [type]="showPassword ? 'text' : 'password'"
-                  id="login-password"
-                  class="bg-gray-50 border border-gray-300 text-black sm:text-sm rounded-lg focus:ring-black focus:border-black block w-full p-2.5"
-                  placeholder="••••••••"
-                  [(ngModel)]="loginUser.password"
-                  name="password"
-                  required
-                >
-                <button
-                  type="button"
-                  class="absolute inset-y-0 right-0 flex items-center pr-3"
-                  (click)="togglePasswordVisibility()"
-                >
-                  <svg *ngIf="showPassword" class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
-                  </svg>
-                  <svg *ngIf="!showPassword" class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                  </svg>
-                </button>
-              </div>
-            </div>
-            <button type="submit" [disabled]="isLoading"
-              class="w-full mt-4 text-white bg-black hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center flex items-center justify-center gap-2 disabled:opacity-75"
-              (click)="login()">
+  <div class="w-full max-w-md mx-auto bg-white rounded-lg shadow-md">
+    <div class="p-6 space-y-4">
+      <div class="text-center">
+        <h1 style="
+            display: flex;
+            justify-content: center;
+            font-weight: bold;
+            font-size: x-large;
+          ">
+          Welcome
+        </h1>
+        <p class="text-gray-500">Login or create an account to continue</p>
+
+      </div>
+      <nz-tabs nzCentered>
+        <nz-tab nzTitle="Login">
+          <form nz-form (ngSubmit)="login()">
+            <nz-form-item class="form-item-gap">
+              <nz-form-control nzHasFeedback [nzErrorTip]="'Email is required and must be valid'">
+                <nz-input-group nzPrefixIcon="user" nzSize="large">
+                  <input nz-input [(ngModel)]="loginUser.userEmail" name="userEmail"
+                    placeholder="Please enter your email" required email />
+                </nz-input-group>
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item class="form-item-gap">
+              <nz-form-control nzHasFeedback [nzErrorTip]="'Please input your Password!'">
+                <nz-input-group nzPrefixIcon="lock" [nzSuffix]="suffixTemplate" nzSize="large">
+                  <input [type]="showPassword ? 'text' : 'password'" nz-input [(ngModel)]="loginUser.password"
+                    placeholder="Password" name="password" required />
+                </nz-input-group>
+                <ng-template #suffixTemplate>
+                  <nz-icon class="ant-input-password-icon" [nzType]="showPassword ? 'eye-invisible' : 'eye'"
+                    (click)="showPassword = !showPassword" />
+                </ng-template>
+              </nz-form-control>
+            </nz-form-item>
+            <button nz-button class="form-item-gap" nzType="primary" (click)="login()" style="width: 100%"
+              [nzLoading]="isLoading">
               @if (isLoading) {
-              <lucide-icon [name]="Loader2" class="animate-spin h-4 w-4"></lucide-icon>
               <span>Logging in...</span>
               } @else {
               <span>Login</span>
               }
             </button>
-        </form>
-      </div>
-        <div *ngIf="!isToggleLogin" class="space-y-4">
-          <form (ngSubmit)="signUp()">
-            <div class="grid grid-cols-2 gap-4">
-              <div class="space-y-2">
-                <label for="first-name" class="block text-sm font-medium text-black">First name</label>
-                <input
-                  type="text"
-                  id="first-name"
-                  class="bg-gray-50 border border-gray-300 text-black sm:text-sm rounded-lg focus:ring-black focus:border-black block w-full p-2.5"
-                  placeholder="First Name"
-                  [(ngModel)]="registerUser.firstName"
-                  name="firstName"
-                  required
-                >
-              </div>
-  
-              <div class="space-y-2">
-                <label for="last-name" class="block text-sm font-medium text-black">Last name</label>
-                <input
-                  type="text"
-                  id="last-name"
-                  class="bg-gray-50 border border-gray-300 text-black sm:text-sm rounded-lg focus:ring-black focus:border-black block w-full p-2.5"
-                  placeholder="Last Name"
-                  [(ngModel)]="registerUser.lastName"
-                  name="lastName"
-                  required
-                >
-              </div>
-            </div>
-  
-            <div class="space-y-2">
-              <label for="signup-email" class="block text-sm font-medium text-black">Email</label>
-              <input
-                type="email"
-                id="signup-email"
-                class="bg-gray-50 border border-gray-300 text-black sm:text-sm rounded-lg focus:ring-black focus:border-black block w-full p-2.5"
-                placeholder="name@example.com"
-                [(ngModel)]="registerUser.email"
-                name="email"
-                required
-              >
-            </div>
-  
-            <div class="space-y-2">
-              <label for="signup-password" class="block text-sm font-medium text-black">Password</label>
-              <div class="relative">
-                <input
-                  [type]="showPassword ? 'text' : 'password'"
-                  id="signup-password"
-                  class="bg-gray-50 border border-gray-300 text-black sm:text-sm rounded-lg focus:ring-black focus:border-black block w-full p-2.5"
-                  placeholder="••••••••"
-                  [(ngModel)]="registerUser.password"
-                  name="password"
-                  required
-                >
-                <button
-                  type="button"
-                  class="absolute inset-y-0 right-0 flex items-center pr-3"
-                  (click)="togglePasswordVisibility()"
-                >
-                  <svg *ngIf="showPassword" class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
-                  </svg>
-                  <svg *ngIf="!showPassword" class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                  </svg>
-                </button>
-              </div>
-            </div>
-  
-            <div class="space-y-2">
-              <label for="confirm-password" class="block text-sm font-medium text-black">Confirm Password</label>
-              <div class="relative">
-                <input
-                  [type]="showConfirmPassword ? 'text' : 'password'"
-                  id="confirm-password"
-                  class="bg-gray-50 border border-gray-300 text-black sm:text-sm rounded-lg focus:ring-black focus:border-black block w-full p-2.5"
-                  placeholder="••••••••"
-                  [(ngModel)]="registerUser.retype_password"
-                  name="retype_password"
-                  required
-                >
-                <button
-                  type="button"
-                  class="absolute inset-y-0 right-0 flex items-center pr-3"
-                  (click)="toggleConfirmPasswordVisibility()"
-                >
-                  <svg *ngIf="showConfirmPassword" class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
-                  </svg>
-                  <svg *ngIf="!showConfirmPassword" class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                  </svg>
-                </button>
-              </div>
-            </div>
-             
-            <button
-              type="submit"[disabled]="isLoading"
-              class="w-full mt-4 text-white bg-black hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center flex items-center justify-center gap-2 disabled:opacity-75"
-            >
-            @if(isLoading) {  
-               <lucide-icon [name]="Loader2" class="animate-spin h-4 w-4"></lucide-icon>
-              <span>Creating Account...</span>
-            }
-            @else {
-                <span>Create Account</span>
-            }
-             
-            </button>
           </form>
-        </div>
-  
-        <div class="text-sm text-gray-500 text-center">
-          By continuing, you agree to our
-          <a href="#" class="text-black hover:underline">Terms of Service</a> and
-          <a href="#" class="text-black hover:underline">Privacy Policy</a>.
-        </div>
+        </nz-tab>
+        <nz-tab nzTitle="Sign Up">
+          <div class="space-y-4">
+            <form (ngSubmit)="signUp()">
+              <nz-form-item>
+                <nz-form-label [nzSpan]="6">First Name</nz-form-label>
+                <nz-form-control [nzSpan]="18" nzHasFeedback [nzErrorTip]="'First Name is required and must be valid'">
+                  <nz-input-group nzSize="large">
+                    <input nz-input [(ngModel)]="registerUser.firstName" name="firstName"
+                      placeholder="Please enter your first name" required />
+                  </nz-input-group>
+                </nz-form-control>
+              </nz-form-item>
+              <nz-form-item>
+                <nz-form-label [nzSpan]="6">Last Name</nz-form-label>
+                <nz-form-control [nzSpan]="18" nzHasFeedback [nzErrorTip]="'Last Name is required and must be valid'">
+                  <nz-input-group nzSize="large">
+                    <input nz-input [(ngModel)]="registerUser.lastName" name="lastName"
+                      placeholder="Please enter your last name" required />
+                  </nz-input-group>
+                </nz-form-control>
+              </nz-form-item>
+              <nz-form-item>
+                <nz-form-label [nzSpan]="6">Email</nz-form-label>
+                <nz-form-control [nzSpan]="18" nzHasFeedback [nzErrorTip]="'Email is required and must be valid'">
+                  <nz-input-group nzSize="large">
+                    <input nz-input type="email" [(ngModel)]="registerUser.email" name="email"
+                      placeholder="name@example.com" required email />
+                  </nz-input-group>
+                </nz-form-control>
+              </nz-form-item>
+
+              <nz-form-item>
+                <nz-form-label [nzSpan]="6">Password</nz-form-label>
+                <nz-form-control [nzSpan]="18" nzHasFeedback [nzErrorTip]="'Password is required'">
+                  <nz-input-group nzSize="large" [nzSuffix]="passwordIconTemplate">
+                    <input nz-input [type]="showPassword ? 'text' : 'password'" [(ngModel)]="registerUser.password"
+                      name="password" placeholder="Enter password" required />
+                  </nz-input-group>
+
+                  <!-- Password Icon Template -->
+                  <ng-template #passwordIconTemplate>
+                    <nz-icon class="ant-input-password-icon" [nzType]="showPassword ? 'eye-invisible' : 'eye'"
+                      (click)="togglePasswordVisibility()"></nz-icon>
+                  </ng-template>
+                </nz-form-control>
+              </nz-form-item>
+              <nz-form-item>
+                <nz-form-label [nzSpan]="6">Confirm Password</nz-form-label>
+                <nz-form-control [nzSpan]="18" nzHasFeedback [nzErrorTip]="'Please confirm your password'">
+                  <nz-input-group nzSize="large" [nzSuffix]="confirmIconTemplate">
+                    <input nz-input [type]="showConfirmPassword ? 'text' : 'password'"
+                      [(ngModel)]="registerUser.retype_password" name="retype_password" placeholder="Re-enter password"
+                      required />
+                  </nz-input-group>
+
+                  <!-- Confirm Password Icon Template -->
+                  <ng-template #confirmIconTemplate>
+                    <nz-icon class="ant-input-password-icon" [nzType]="showConfirmPassword ? 'eye-invisible' : 'eye'"
+                      (click)="toggleConfirmPasswordVisibility()"></nz-icon>
+                  </ng-template>
+                </nz-form-control>
+              </nz-form-item>
+
+              <button nz-button nzType="primary" type="submit" [nzLoading]="isLoading" class="button">
+                @if (isLoading) {
+                <!-- <lucide-icon [name]="Loader2" class="animate-spin h-4 w-4"></lucide-icon> -->
+                <span>Creating Account...</span>
+                } @else {
+                <span>Create Account</span>
+                }
+              </button>
+            </form>
+          </div>
+        </nz-tab>
+      </nz-tabs>
+
+      <div class="text-sm text-gray-500 text-center">
+        By continuing, you agree to our
+        <a class="text-black hover:underline">Terms of Service</a> and
+        <a class="text-black hover:underline">Privacy Policy</a>.
       </div>
     </div>
   </div>
+</div>

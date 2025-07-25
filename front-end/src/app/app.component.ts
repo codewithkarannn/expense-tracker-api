@@ -3,9 +3,10 @@ import { RouterOutlet } from '@angular/router';
 import { initFlowbite } from 'flowbite';
 import { ToastComponent } from './components/toast/toast.component';
 
+
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, ToastComponent],
+  imports: [RouterOutlet, ToastComponent ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })

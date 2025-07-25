@@ -76,6 +76,19 @@ export interface TransactionSummary {
   
   /** Total expenses in current period */
   currentExpense: string;
+  todayIncome: string;
+  weekIncome: string;
+  monthIncome: string;
+  dayIncomeChange: string;
+  weekIncomeChange: string;
+  monthIncomeChange: string;
+
+  todayExpense: string;
+  weekExpense: string;
+  monthExpense: string;
+  dayExpenseChange: string;
+  weekExpenseChange: string;
+  monthExpenseChange: string;
   
   /** Total expenses in previous period */
   previousExpense: string;

@@ -1,5 +1,5 @@
 // auth.component.ts
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { LoginUser } from '../../models/login-user';
 import { ApiResponse } from '../../models/api-reponse';
 import { AuthService } from '../../services/auth.service';
@@ -7,16 +7,26 @@ import { FormsModule } from '@angular/forms';
 import { RegisterUser } from '../../models/register-user';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { LucideAngularModule, Loader2 } from 'lucide-angular';
+import { NzButtonModule } from 'ng-zorro-antd/button'; 
 import { ToastServiceService } from '../../services/toast-service.service';
-
+import { NzFormModule } from 'ng-zorro-antd/form';
+import { NzInputModule } from 'ng-zorro-antd/input';
+import { NzTabsModule } from 'ng-zorro-antd/tabs';
+import { NzPageHeaderModule } from 'ng-zorro-antd/page-header';
+import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NotificationService } from '../../services/notification-service';
 @Component({
   selector: 'app-auth',
   standalone: true,
   imports: [
     FormsModule,
     CommonModule,
-    LucideAngularModule
+    NzButtonModule,
+    NzFormModule,
+    NzInputModule, 
+    NzPageHeaderModule,
+    NzIconModule,
+    NzTabsModule
   ],
   templateUrl: './auth.component.html',
   styleUrls: ['./auth.component.css']
@@ -27,7 +37,8 @@ export class AuthComponent {
   showPassword = false;
   showConfirmPassword = false;
   isLoading = false;
-  Loader2 = Loader2;
+  
+
 
   loginUser: LoginUser = {
     userEmail: "",
@@ -41,6 +52,8 @@ export class AuthComponent {
     firstName: "",
     lastName: "",
   }
+
+private notificationService =  inject(NotificationService);
 
   constructor(private authService: AuthService, 
     private router: Router,
@@ -64,18 +77,15 @@ export class AuthComponent {
         localStorage.setItem("auth_token", token);
         this.router.navigate(['/dashboard']);
         this.isLoading = false;
-        this.toast.show({
-          message: 'Login successful!',
-          type: 'success',
-          duration: 3000
-        });
+        this.notificationService.success('Success', 'Login successful!');
       },
       error: err => {
-        alert(err.error?.message || 'An error occurred during login.');
+        this.notificationService.error('Error', err.message || 'An error occurred during login.');
         this.isLoading = false;
       }
     });
   }
+
 
   
   signUp(): void {
@@ -86,14 +96,18 @@ export class AuthComponent {
         
           this.isToggleLogin = true;
           this.isLoading = false; 
+          this.notificationService.success('Success', 'Account created successfully! You can now log in.');
+          this.router.navigate(['/login']);
         },
         error: err => {
-          alert(err.error?.message || 'An error occurred during sign up.');
+
+          this.notificationService.error('Error', err.error?.message || 'An error occurred during sign up.');
           this.isLoading = false;
         }
       });
     } else {
-      alert("Passwords don't match");
+        this.notificationService.error('Error', 'Passwords do not match');
+        this.isLoading = false;
     }
   }
 

@@ -2,7 +2,7 @@ import { AfterViewInit, Component, ElementRef, inject, Inject, input, OnInit, ou
 import { TransactionsService } from '../../services/transactions.service';
 import { Transaction } from '../../models/login-user';
 import { DatePipe, NgClass } from '@angular/common';
-import { LucideTrash } from 'lucide-angular';
+
 import { NgModel } from '@angular/forms';
 import Chart from 'chart.js/auto';
 import { ExpenseIncomeLineGraphComponent } from "../expense-income-line-graph/expense-income-line-graph.component";

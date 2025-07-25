@@ -1,157 +1,217 @@
+<!-- Top Bar -->
+<!-- Top Bar -->
+<div class="top-bar">
+  <div class="top-bar-content">
+    <div class="user-profile">
+      <div>
+        <nz-avatar [nzGap]="5" [nzText]="'KV'" nzSize="large"></nz-avatar>
+      </div>
+      <div class="user-details">
+        <span class="user-name">Karan Vishwakarma</span>
+        <span class="user-email">karanvishwakarmagmail.com</span>
+      </div>
+    </div>
 
-
-<div class="mx-4 md:mx-8 lg:mx-16 xl:mx-24 2xl:mx-32">
-  <!-- Top Bar -->
-  <div class="mt-4 flex w-full justify-between items-center">
-    <h1 class="text-xl sm:text-2xl font-extrabold text-gray-900">Dashboard</h1>
-    <div>
-      <button (click)="openPopup()"
-        class="text-white bg-black font-medium rounded-lg text-xs sm:text-sm px-4 sm:px-5 py-2 sm:py-2.5 me-2 mb-2">
-        Add Transaction
+    <div class="top-bar-actions ">
+      <div class="total-balance-container desktop-only">
+        @if (transactionSummary.currentBalance === undefined) {
+        <nz-skeleton class="balance-skeleton" [nzActive]="true" [nzTitle]="false"
+          [nzParagraph]="{ rows: 2, width: ['70%', '100%'] }" />
+        } @else {
+        <div class="total-balance">
+          <span class="balance-label">Total Balance</span>
+          <span class="balance-amount">
+            {{ transactionSummary.currentBalance }}
+          </span>
+        </div>
+        }
+      </div>
+      <button nz-button nz-tooltip nzTooltipPlacement="bottom" nzTooltipTitle="Add new transaction" nzType="primary"
+        (click)="openPopup()">
+        <nz-icon nzType="plus" nzTheme="outline" />
       </button>
-      <button (click)="logout()"
-        class="text-white bg-red-600 font-medium rounded-lg text-xs sm:text-sm px-4 sm:px-5 py-2 sm:py-2.5 me-2 mb-2">
-        Logout
+
+      <button nz-button nzType="primary" nz-tooltip nzTooltipPlacement="bottom" nzTooltipTitle="Logout" nzDanger
+        (click)="logout()">
+        <nz-icon nzType="logout" nzTheme="outline" />
       </button>
     </div>
-   
   </div>
 
+
+
+</div>
+
+
+<div class="responsive-margin-x">
+  <!-- Total values -->
+  <div class="mobile-only" style="margin-top: 1rem;">
+    <div class="total-balance-container">
+      @if (transactionSummary.currentBalance === undefined) {
+      <nz-skeleton [nzActive]="true" [nzTitle]="false" [nzParagraph]="{ rows: 2 }" class="summary-card" />
+      } @else {
+      <nz-card class="total-balance-card " nzBordered>
+        <div class="total-balance-content">
+          <span class="label">Total Balance</span>
+          <span class="amount">
+            {{ transactionSummary.currentBalance }}
+          </span>
+        </div>
+      </nz-card>
+
+
+
+      }
+    </div>
+  </div>
+  <div class="animated-tab-toggle">
+    <div class="slider" [class.right]="selectedTab === 'income'"></div>
+
+    <button class="tab-button" [class.active]="selectedTab === 'expense'" (click)="selectedTab = 'expense'">
+      Expenses
+    </button>
+
+    <button class="tab-button" [class.active]="selectedTab === 'income'" (click)="selectedTab = 'income'">
+      Income
+    </button>
+  </div>
+  @if (selectedTab === 'expense') {
+  <div class="summary-cards-container">
+    <!-- Day Balance -->
+    @if (transactionSummary?.currentBalance === undefined) {
+    <nz-skeleton [nzActive]="true" [nzTitle]="false" [nzParagraph]="{ rows: 3 }" class="summary-card" />
+    } @else {
+    <nz-card class="summary-card" nzBordered>
+      <div class="card-content">
+        <span class="card-title">Day</span>
+        <span class="card-amount">
+          {{ transactionSummary.todayExpense || '0.00' }}
+        </span>
+        <span class="card-change">
+          {{ transactionSummary.dayExpenseChange }}% from last month
+        </span>
+      </div>
+    </nz-card>
+    }
+
+    <!-- Total Income -->
+    @if (transactionSummary?.currentIncome === undefined) {
+    <nz-skeleton [nzActive]="true" [nzTitle]="false" [nzParagraph]="{ rows: 3 }" class="summary-card" />
+    } @else {
+    <nz-card class="summary-card" nzBordered>
+      <div class="card-content">
+        <span class="card-title">This Week</span>
+        <span class="card-amount">
+          {{ transactionSummary.weekExpense || '0.00' }}
+        </span>
+        <span class="card-change">
+          {{ transactionSummary.weekExpenseChange }}% from last month
+        </span>
+      </div>
+    </nz-card>
+    }
+
+    <!-- Total Expense -->
+    @if (transactionSummary?.currentExpense === undefined) {
+    <nz-skeleton [nzActive]="true" [nzTitle]="false" [nzParagraph]="{ rows: 3 }" class="summary-card" />
+    } @else {
+    <nz-card class="summary-card" nzBordered>
+      <div class="card-content">
+        <span class="card-title">This Month</span>
+        <span class="card-amount">
+          {{ transactionSummary.monthExpense || '0.00' }}
+        </span>
+        <span class="card-change">
+          {{ transactionSummary.monthExpenseChange }}% from last month
+        </span>
+      </div>
+    </nz-card>
+    }
+  </div>
+  }
+  @if(selectedTab === 'income'){
+  <div class="summary-cards-container">
+    <!-- Day Balance -->
+    @if (transactionSummary?.currentBalance === undefined) {
+    <nz-skeleton [nzActive]="true" [nzTitle]="false" [nzParagraph]="{ rows: 3 }" class="summary-card" />
+    } @else {
+    <nz-card class="summary-card" nzBordered>
+      <div class="card-content">
+        <span class="card-title">Day</span>
+        <span class="card-amount">
+          {{ transactionSummary.todayIncome || '0.00' }}
+        </span>
+        <span class="card-change">
+          {{ transactionSummary.dayIncomeChange }}% from last month
+        </span>
+      </div>
+    </nz-card>
+    }
+
+    <!-- Total Income -->
+    @if (transactionSummary?.currentIncome === undefined) {
+    <nz-skeleton [nzActive]="true" [nzTitle]="false" [nzParagraph]="{ rows: 3 }" class="summary-card" />
+    } @else {
+    <nz-card class="summary-card" nzBordered>
+      <div class="card-content">
+        <span class="card-title">This Week</span>
+        <span class="card-amount">
+          {{ transactionSummary.weekIncome || '0.00' }}
+        </span>
+        <span class="card-change">
+          {{ transactionSummary.weekIncomeChange }}% from last month
+        </span>
+      </div>
+    </nz-card>
+    }
+
+    <!-- Total Expense -->
+    @if (transactionSummary?.currentExpense === undefined) {
+    <nz-skeleton [nzActive]="true" [nzTitle]="false" [nzParagraph]="{ rows: 3 }" class="summary-card" />
+    } @else {
+    <nz-card class="summary-card" nzBordered>
+      <div class="card-content">
+        <span class="card-title">This Month</span>
+        <span class="card-amount">
+          {{ transactionSummary.monthIncome || '0.00' }}
+        </span>
+        <span class="card-change">
+          {{ transactionSummary.monthIncomeChange }}% from last month
+        </span>
+      </div>
+    </nz-card>
+    }
+  </div>
+  }
+
+
+
+  <nz-tabset [nzSelectedIndex]="tabNames.indexOf(activeTab)" (nzSelectedIndexChange)="onNzTabChange($event)">
+
+    @for(tab of tabNames; track tab) {
+    <nz-tab [nzTitle]="capitalize(tab)">
+    </nz-tab>
+    }
+
+  </nz-tabset>
   <!-- Popup Form -->
-  <app-popup-add-transaction-form
-    [isVisible]="showAddTransactionForm()"
-    [title]="'Enter Your Details'"
-    (closePopup)="onClosePopup()"
-    (formSubmit)="onTransactionAdded()"
-    (categoryAdded)="onCategoryAdded($event)"
-    (typeAdded)="onTypeAdded($event)"
-    (paymentModeAdded)="onPaymentModeAdded($event)"
-    [transactionTypes]="transactionTypes()"
-    (categoryRemoved)=" onCategoryRemoved($event)"
-    
-    (typeRemoved)="onTypeRemoved($event)"
-    (paymentModeRemoved)="onPaymentModeRemoved($event)"
-    [transactionCategories]="transactionCategories()"
-    [transactionPaymentMode]="transactionPaymentMode()">
+  <app-popup-add-transaction-form [isVisible]="showAddTransactionForm()" [title]="'Enter Your Details'"
+    (closePopup)="onClosePopup()" (formSubmit)="onTransactionAdded()" (categoryAdded)="onCategoryAdded($event)"
+    (typeAdded)="onTypeAdded($event)" (paymentModeAdded)="onPaymentModeAdded($event)"
+    [transactionTypes]="transactionTypes()" (categoryRemoved)=" onCategoryRemoved($event)"
+    (typeRemoved)="onTypeRemoved($event)" (paymentModeRemoved)="onPaymentModeRemoved($event)"
+    [transactionCategories]="transactionCategories()" [transactionPaymentMode]="transactionPaymentMode()">
   </app-popup-add-transaction-form>
 
   <hr class="border-slate-100 border-1 mt-2">
-
-  <!-- Total Cards -->
-  <div class="mt-4 mb-4">
-    <div class="flex flex-col md:flex-row justify-between gap-4">
-
-      <!-- Total Balance Card -->
-      @if (transactionSummary?.currentBalance != undefined) {
-        <div class="flex flex-col items-start justify-start border border-slate-200 rounded-xl w-full md:w-1/3 py-3 sm:py-4 px-3 sm:px-4 md:px-6">
-          <span class="text-xs sm:text-base">Total Balance</span>
-          <span class="text-sm sm:text-xl md:text-2xl mt-1 font-bold">{{transactionSummary.currentBalance}}</span>
-          <span class="text-[10px] sm:text-xs text-gray-600">{{transactionSummary.balancePercentageChange}}% from last month</span>
-        </div>
-      } @else {
-        <div class="animate-pulse flex flex-col items-start justify-start border border-slate-200 rounded-xl w-full md:w-1/3 py-3 sm:py-4 px-3 sm:px-4 md:px-6">
-          <div class="h-4 bg-gray-300 rounded mb-2 w-3/4"></div>
-          <div class="h-6 bg-gray-300 rounded mb-2 w-full"></div>
-          <div class="h-3 bg-gray-300 rounded w-2/3"></div>
-        </div>
-      }
-
-      <!-- Total Income Card -->
-      @if (transactionSummary?.currentIncome != undefined)  {
-        <div class="flex flex-col items-start justify-start border border-slate-200 rounded-xl w-full md:w-1/3 py-3 sm:py-4 px-3 sm:px-4 md:px-6">
-          <span class="text-xs sm:text-base">Total Income</span>
-          <span class="text-sm sm:text-xl md:text-2xl mt-1 font-bold">{{transactionSummary.currentIncome}}</span>
-          <span class="text-[10px] sm:text-xs text-gray-600">{{transactionSummary.incomePercentageChange}}% from last month</span>
-        </div>
-      } @else {
-        <div class="animate-pulse flex flex-col items-start justify-start border border-slate-200 rounded-xl w-full md:w-1/3 py-3 sm:py-4 px-3 sm:px-4 md:px-6">
-          <div class="h-4 bg-gray-300 rounded mb-2 w-3/4"></div>
-          <div class="h-6 bg-gray-300 rounded mb-2 w-full"></div>
-          <div class="h-3 bg-gray-300 rounded w-1/2"></div>
-        </div>
-      }
-
-      <!-- Total Expense Card --> 
-      @if (transactionSummary?.currentExpense != undefined) {
-        <div class="flex flex-col items-start justify-start border border-slate-200 rounded-xl w-full md:w-1/3 py-3 sm:py-4 px-3 sm:px-4 md:px-6">
-          <span class="text-xs sm:text-base">Total Expense</span>
-          <span class="text-sm sm:text-xl md:text-2xl mt-1 font-bold">{{transactionSummary.currentExpense}}</span>
-          <span class="text-[10px] sm:text-xs text-gray-600">{{transactionSummary.expensePercentageChange}}% from last month</span>
-        </div>
-      } @else {
-        <div class="animate-pulse flex flex-col items-start justify-start border border-slate-200 rounded-xl w-full md:w-1/3 py-3 sm:py-4 px-3 sm:px-4 md:px-6">
-          <div class="h-4 bg-gray-300 rounded mb-2 w-3/4"></div>
-          <div class="h-6 bg-gray-300 rounded mb-2 w-full"></div>
-          <div class="h-3 bg-gray-300 rounded w-1/2"></div>
-        </div>
-      }
-
-    </div>
-  </div>
-
-  <!-- Tab Navigation -->
-  <div class="flex border-b border-gray-200 bg-gray-200 w-full md:w-3/4 lg:w-1/2 xl:w-1/3 mb-4 p-1 rounded-lg">
-    <button
-      type="button"
-      class="flex-1 py-2 px-3 sm:py-2.5 sm:px-4 text-xs sm:text-sm font-medium text-center transition-colors duration-200"
-      [ngClass]="{
-        'text-black bg-white shadow-sm rounded-sm': isTabActive('overview'),
-        'text-gray-500': !isTabActive('overview')
-      }"
-      (click)="setActiveTab('overview')">
-      Overview
-    </button>
-
-    <button
-      type="button"
-      class="flex-1 py-2 px-3 sm:py-2.5 sm:px-4 text-xs sm:text-sm font-medium text-center transition-colors duration-200"
-      [ngClass]="{
-        'text-black bg-white shadow-sm rounded-sm': isTabActive('analytics'),
-        'text-gray-500': !isTabActive('analytics')
-      }"
-      (click)="setActiveTab('analytics')">
-      Analytics
-    </button>
-
-    <button
-      type="button"
-      class="flex-1 py-2 px-3 sm:py-2.5 sm:px-4 text-xs sm:text-sm font-medium text-center transition-colors duration-200"
-      [ngClass]="{
-        'text-black bg-white shadow-sm rounded-sm': isTabActive('transaction'),
-        'text-gray-500': !isTabActive('transaction')
-      }"
-      (click)="setActiveTab('transaction')">
-      Transactions
-    </button>
-
-    <button
-      type="button"
-      class="flex-1 py-2 px-3 sm:py-2.5 sm:px-4 text-xs sm:text-sm font-medium text-center transition-colors duration-200"
-      [ngClass]="{
-        'text-black bg-white shadow-sm rounded-sm': isTabActive('budget'),
-        'text-gray-500': !isTabActive('budget')
-      }"
-      (click)="setActiveTab('budget')">
-      Budgets
-    </button>
-  </div>
-
   <!-- Tab Content -->
   <div>
     @if (isTabActive('overview')) {
-      <app-overview 
-      [userId]="userId"
-      (navigateToAllTransaction)="navigateToAllTransactions()"
-      
-      ></app-overview>
+    <app-overview [userId]="userId" (navigateToAllTransaction)="navigateToAllTransactions()"></app-overview>
     } @else if (isTabActive('transaction')) {
-      <app-all-transactions 
-      [userId]="userId"
-      [transactionCategories]="transactionCategories()"
+    <app-all-transactions [userId]="userId" [transactionCategories]="transactionCategories()"
       [transactionTypes]="transactionTypes()"
-      [transactionPaymentMode]="transactionPaymentMode()"
-      
-      ></app-all-transactions>
+      [transactionPaymentMode]="transactionPaymentMode()"></app-all-transactions>
     }
   </div>
 </div>
