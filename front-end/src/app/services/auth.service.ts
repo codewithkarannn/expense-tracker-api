@@ -1,39 +1,49 @@
 import { Injectable } from '@angular/core';
-import {LoginUser} from '../models/login-user';
-import {HttpClient, HttpErrorResponse} from '@angular/common/http';
-import {catchError, map, Observable, tap, throwError} from 'rxjs';
-import {ApiResponse} from '../models/api-reponse';
-import {RegisterUser} from '../models/register-user';
+import { LoginUser, UserDetails } from '../models/login-user';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { catchError, map, Observable, tap, throwError } from 'rxjs';
+import { ApiResponse } from '../models/api-reponse';
+import { RegisterUser } from '../models/register-user';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
-  private baseUrl: string ="https://localhost:7238/api";
+  // private baseUrl: string = 'https://localhost:7238/api';
+  private baseUrl: string = 'http://expenser-tracker.runasp.net/api';
   // private tokenKey: string = " ";
   httpClient: HttpClient;
 
   constructor(_httpClient: HttpClient) {
-  this.httpClient = _httpClient;
-
+    this.httpClient = _httpClient;
   }
 
-login(loginData: LoginUser): Observable<any> {
-    return this.httpClient.post<any>(`${this.baseUrl}/auth/login`, loginData)
-  .pipe(
-    catchError(this.handleError)
-  )
-}
-  signUp(signUpData: any): Observable<any> {
-    return this.httpClient.post<any>(`${this.baseUrl}/auth/register`, signUpData)
+  getUserDetails(userId: string): Observable<ApiResponse<UserDetails>> {
+    return this.httpClient
+      .get<
+        ApiResponse<UserDetails>
+      >(`${this.baseUrl}/auth/GetUserDetail?userid=${userId}`)
       .pipe(
-        catchError(this.handleError)
+        tap((userDetails) => {
+          console.log('User Details:', userDetails);
+        }),
+        catchError(this.handleError),
       );
   }
 
+  login(loginData: LoginUser): Observable<any> {
+    return this.httpClient
+      .post<any>(`${this.baseUrl}/auth/login`, loginData)
+      .pipe(catchError(this.handleError));
+  }
+  signUp(signUpData: any): Observable<any> {
+    return this.httpClient
+      .post<any>(`${this.baseUrl}/auth/register`, signUpData)
+      .pipe(catchError(this.handleError));
+  }
 
   private saveToken(token: string): void {
-    localStorage.setItem("auth", token);
+    localStorage.setItem('auth', token);
   }
 
   // Error handling method

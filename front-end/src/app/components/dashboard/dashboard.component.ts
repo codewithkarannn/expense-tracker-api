@@ -8,6 +8,7 @@ import {
   Transaction,
   TransactionSummary,
   TransactionPaymentMode,
+  UserDetails,
 } from '../../models/login-user';
 import { OverviewComponent } from '../overview/overview.component';
 import { NgClass } from '@angular/common';
@@ -24,6 +25,7 @@ import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzTabsComponent, NzTabsModule } from 'ng-zorro-antd/tabs';
 import { FormsModule } from '@angular/forms';
 import { NzSelectModule } from 'ng-zorro-antd/select';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -49,11 +51,22 @@ import { NzSelectModule } from 'ng-zorro-antd/select';
   styleUrl: './dashboard.component.css',
 })
 export class DashboardComponent implements OnInit {
+  parseFloat = parseFloat;
+
   transactionTypes = signal<TransactionType[]>([]);
   transactionSummary = <TransactionSummary>{};
   transactionCategories = signal<TransactionCategory[]>([]);
   transactionPaymentMode = signal<TransactionPaymentMode[]>([]);
+  userDetails = signal<UserDetails>({} as UserDetails);
+
+  // Using inject to get instances of services
   state = inject(TransactionStateService);
+  transactionsService = inject(TransactionsService);
+  toast = inject(ToastServiceService);
+  router = inject(Router);
+  userService = inject(AuthService);
+
+  userIntials = signal<string>('U'); // Default initials
   showAddTransactionForm = signal(false);
   activeTab: string = 'overview'; // Default active tab
   userId = '';
@@ -65,11 +78,7 @@ export class DashboardComponent implements OnInit {
     { label: 'Expense', value: 'expense' },
     { label: 'Income', value: 'income' },
   ];
-  constructor(
-    private transactionsService: TransactionsService,
-    private toast: ToastServiceService,
-    private router: Router,
-  ) {}
+
   ngOnInit() {
     this.state.tab$.subscribe((tab) => {
       this.activeTab = tab;
@@ -83,6 +92,7 @@ export class DashboardComponent implements OnInit {
     this.getallTransactionTypes();
     this.getallTransactionCategories();
     this.getallTransactionPaymentMode();
+    this.getuserDetails();
   }
   tabLabel(tab: string): string {
     return tab.charAt(0).toUpperCase() + tab.slice(1); // 'overview' → 'Overview'
@@ -101,6 +111,17 @@ export class DashboardComponent implements OnInit {
   onTabChange(index: number): void {
     const selectedTab = this.tabNames[index];
     this.setActiveTab(selectedTab); // existing function
+  }
+
+  getuserInitials(): string {
+    const user = this.userDetails();
+    if (user && user.firstName && user.lastName) {
+      this.userIntials.set(
+        user.firstName.charAt(0).toUpperCase() +
+          user.lastName.charAt(0).toUpperCase(),
+      );
+    }
+    return 'U';
   }
 
   logout() {
@@ -184,6 +205,18 @@ export class DashboardComponent implements OnInit {
         },
         error: (error) => {},
       }));
+  }
+
+  getuserDetails(): void {
+    this.userService.getUserDetails(this.userId).subscribe({
+      next: (response: ApiResponse<UserDetails>) => {
+        this.userDetails.set(response.data);
+        this.getuserInitials();
+      },
+      error: (error) => {
+        console.error('Error fetching user details:', error);
+      },
+    });
   }
   onCategoryAdded(category: TransactionCategory) {
     this.transactionCategories.update((currentCategories) => {

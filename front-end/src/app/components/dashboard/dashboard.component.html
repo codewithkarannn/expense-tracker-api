@@ -1,217 +1,257 @@
-<!-- Top Bar -->
-<!-- Top Bar -->
 <div class="top-bar">
   <div class="top-bar-content">
     <div class="user-profile">
       <div>
-        <nz-avatar [nzGap]="5" [nzText]="'KV'" nzSize="large"></nz-avatar>
+        <nz-avatar [nzGap]="5" [nzText]="this.userIntials()" nzSize="large"></nz-avatar>
       </div>
       <div class="user-details">
-        <span class="user-name">Karan Vishwakarma</span>
-        <span class="user-email">karanvishwakarmagmail.com</span>
+        <span class="user-name">{{ this.userDetails().firstName + " " + this.userDetails().lastName }}</span>
+        <span class="user-email">{{ this.userDetails().userEmail }}</span>
       </div>
     </div>
 
-    <div class="top-bar-actions ">
-      <div class="total-balance-container desktop-only">
+    <div class="top-bar-actions">
+      <div class="total-balance-container desktop-only flext items-center">
         @if (transactionSummary.currentBalance === undefined) {
         <nz-skeleton class="balance-skeleton" [nzActive]="true" [nzTitle]="false"
           [nzParagraph]="{ rows: 2, width: ['70%', '100%'] }" />
         } @else {
         <div class="total-balance">
           <span class="balance-label">Total Balance</span>
-          <span class="balance-amount">
-            {{ transactionSummary.currentBalance }}
-          </span>
+          <span class="balance-amount">{{ transactionSummary.currentBalance }}</span>
         </div>
         }
       </div>
-      <button nz-button nz-tooltip nzTooltipPlacement="bottom" nzTooltipTitle="Add new transaction" nzType="primary"
+      <button nz-button nzType="primary" nz-tooltip nzTooltipPlacement="bottom" nzTooltipTitle="Add new transaction"
         (click)="openPopup()">
         <nz-icon nzType="plus" nzTheme="outline" />
       </button>
 
-      <button nz-button nzType="primary" nz-tooltip nzTooltipPlacement="bottom" nzTooltipTitle="Logout" nzDanger
+      <button nz-button nzType="primary" nzDanger nz-tooltip nzTooltipPlacement="bottom" nzTooltipTitle="Logout"
         (click)="logout()">
         <nz-icon nzType="logout" nzTheme="outline" />
       </button>
     </div>
   </div>
-
-
-
 </div>
 
-
 <div class="responsive-margin-x">
-  <!-- Total values -->
-  <div class="mobile-only" style="margin-top: 1rem;">
+  <!-- Total values (Mobile Only) -->
+  <div class="mobile-only" style="margin-top: 1rem">
     <div class="total-balance-container">
       @if (transactionSummary.currentBalance === undefined) {
-      <nz-skeleton [nzActive]="true" [nzTitle]="false" [nzParagraph]="{ rows: 2 }" class="summary-card" />
+      <nz-skeleton class="summary-card" [nzActive]="true" [nzTitle]="false" [nzParagraph]="{ rows: 2 }" />
       } @else {
-      <nz-card class="total-balance-card " nzBordered>
+      <nz-card class="total-balance-card" nzBordered>
         <div class="total-balance-content">
           <span class="label">Total Balance</span>
-          <span class="amount">
-            {{ transactionSummary.currentBalance }}
-          </span>
+          <span class="amount">{{ transactionSummary.currentBalance }}</span>
         </div>
       </nz-card>
-
-
-
       }
     </div>
   </div>
+  <!-- Animated Tab Toggle -->
   <div class="animated-tab-toggle">
     <div class="slider" [class.right]="selectedTab === 'income'"></div>
-
     <button class="tab-button" [class.active]="selectedTab === 'expense'" (click)="selectedTab = 'expense'">
       Expenses
     </button>
-
     <button class="tab-button" [class.active]="selectedTab === 'income'" (click)="selectedTab = 'income'">
       Income
     </button>
   </div>
+  <!-- Expense Cards -->
   @if (selectedTab === 'expense') {
-  <div class="summary-cards-container">
-    <!-- Day Balance -->
+  <div class="summary-cards-container mb-4">
+    <!-- Day Expense -->
     @if (transactionSummary?.currentBalance === undefined) {
-    <nz-skeleton [nzActive]="true" [nzTitle]="false" [nzParagraph]="{ rows: 3 }" class="summary-card" />
+    <nz-skeleton class="summary-card" [nzActive]="true" [nzTitle]="false" [nzParagraph]="{ rows: 3 }" />
     } @else {
     <nz-card class="summary-card" nzBordered>
       <div class="card-content">
         <span class="card-title">Day</span>
-        <span class="card-amount">
-          {{ transactionSummary.todayExpense || '0.00' }}
-        </span>
+        <span class="card-amount">{{ transactionSummary.todayExpense || '0.00' }}</span>
         <span class="card-change">
-          {{ transactionSummary.dayExpenseChange }}% from last month
+          <span [ngClass]="
+                                                                              parseFloat(transactionSummary.dayExpenseChange) > 0 ? 'change-rate-negative'
+                                                                              : parseFloat(transactionSummary.dayExpenseChange) < 0 ? 'change-rate-positive'
+                                                                              : 'change-rate-neutral'
+                                                                            ">
+            <nz-icon [nzType]="
+                                                                                parseFloat(transactionSummary.dayExpenseChange) > 0 ? 'rise'
+                                                                                : parseFloat(transactionSummary.dayExpenseChange) < 0 ? 'fall'
+                                                                                : 'stock'
+                                                                              " nzTheme="outline"></nz-icon>
+            {{ transactionSummary.dayExpenseChange }}%
+          </span> from yesterday
         </span>
       </div>
     </nz-card>
     }
 
-    <!-- Total Income -->
+    <!-- Week Expense -->
     @if (transactionSummary?.currentIncome === undefined) {
-    <nz-skeleton [nzActive]="true" [nzTitle]="false" [nzParagraph]="{ rows: 3 }" class="summary-card" />
+    <nz-skeleton class="summary-card" [nzActive]="true" [nzTitle]="false" [nzParagraph]="{ rows: 3 }" />
     } @else {
     <nz-card class="summary-card" nzBordered>
       <div class="card-content">
         <span class="card-title">This Week</span>
-        <span class="card-amount">
-          {{ transactionSummary.weekExpense || '0.00' }}
-        </span>
+        <span class="card-amount">{{ transactionSummary.weekExpense || '0.00' }}</span>
         <span class="card-change">
-          {{ transactionSummary.weekExpenseChange }}% from last month
+          <span [ngClass]="
+                                                                              parseFloat(transactionSummary.weekExpenseChange) > 0 ? 'change-rate-negative'
+                                                                              : parseFloat(transactionSummary.weekExpenseChange) < 0 ? 'change-rate-positive'
+                                                                              : 'change-rate-neutral'
+                                                                            ">
+            <nz-icon [nzType]="
+                                                                                parseFloat(transactionSummary.weekExpenseChange) > 0 ? 'rise'
+                                                                                : parseFloat(transactionSummary.weekExpenseChange) < 0 ? 'fall'
+                                                                                : 'stock'
+                                                                              " nzTheme="outline"></nz-icon>
+            {{ transactionSummary.weekExpenseChange }}%
+          </span> from last week
         </span>
       </div>
     </nz-card>
     }
 
-    <!-- Total Expense -->
+    <!-- Month Expense -->
     @if (transactionSummary?.currentExpense === undefined) {
-    <nz-skeleton [nzActive]="true" [nzTitle]="false" [nzParagraph]="{ rows: 3 }" class="summary-card" />
+    <nz-skeleton class="summary-card" [nzActive]="true" [nzTitle]="false" [nzParagraph]="{ rows: 3 }" />
     } @else {
     <nz-card class="summary-card" nzBordered>
       <div class="card-content">
         <span class="card-title">This Month</span>
-        <span class="card-amount">
-          {{ transactionSummary.monthExpense || '0.00' }}
-        </span>
+        <span class="card-amount">{{ transactionSummary.monthExpense || '0.00' }}</span>
         <span class="card-change">
-          {{ transactionSummary.monthExpenseChange }}% from last month
+          <span [ngClass]="
+                                                                              parseFloat(transactionSummary.monthExpenseChange) > 0 ? 'change-rate-negative'
+                                                                              : parseFloat(transactionSummary.monthExpenseChange) < 0 ? 'change-rate-positive'
+                                                                              : 'change-rate-neutral'
+                                                                            ">
+            <nz-icon [nzType]="
+                                                                                parseFloat(transactionSummary.monthExpenseChange) > 0 ? 'rise'
+                                                                                : parseFloat(transactionSummary.monthExpenseChange) < 0 ? 'fall'
+                                                                                : 'stock'
+                                                                              " nzTheme="outline"></nz-icon>
+            {{ transactionSummary.monthExpenseChange }}%
+          </span> from last month
         </span>
       </div>
     </nz-card>
     }
   </div>
   }
+  <!-- Income Cards -->
   @if(selectedTab === 'income'){
-  <div class="summary-cards-container">
-    <!-- Day Balance -->
+  <div class="summary-cards-container mb-4">
+    <!-- Day Income -->
     @if (transactionSummary?.currentBalance === undefined) {
-    <nz-skeleton [nzActive]="true" [nzTitle]="false" [nzParagraph]="{ rows: 3 }" class="summary-card" />
+    <nz-skeleton class="summary-card" [nzActive]="true" [nzTitle]="false" [nzParagraph]="{ rows: 3 }" />
     } @else {
     <nz-card class="summary-card" nzBordered>
       <div class="card-content">
         <span class="card-title">Day</span>
-        <span class="card-amount">
-          {{ transactionSummary.todayIncome || '0.00' }}
-        </span>
+        <span class="card-amount">{{ transactionSummary.todayIncome || '0.00' }}</span>
         <span class="card-change">
-          {{ transactionSummary.dayIncomeChange }}% from last month
+          <span [ngClass]="
+                                                                              parseFloat(transactionSummary.dayIncomeChange) > 0 ? 'change-rate-positive'
+                                                                              : parseFloat(transactionSummary.dayIncomeChange) < 0 ? 'change-rate-negative'
+                                                                              : 'change-rate-neutral'
+                                                                            ">
+            <nz-icon [nzType]="
+                                                                                parseFloat(transactionSummary.dayIncomeChange) > 0 ? 'rise'
+                                                                                : parseFloat(transactionSummary.dayIncomeChange) < 0 ? 'fall'
+                                                                                : 'stock'
+                                                                              " nzTheme="outline"></nz-icon>
+            {{ transactionSummary.dayIncomeChange }}%
+          </span> from yesterday
         </span>
       </div>
     </nz-card>
     }
 
-    <!-- Total Income -->
+    <!-- Week Income -->
     @if (transactionSummary?.currentIncome === undefined) {
-    <nz-skeleton [nzActive]="true" [nzTitle]="false" [nzParagraph]="{ rows: 3 }" class="summary-card" />
+    <nz-skeleton class="summary-card" [nzActive]="true" [nzTitle]="false" [nzParagraph]="{ rows: 3 }" />
     } @else {
     <nz-card class="summary-card" nzBordered>
       <div class="card-content">
         <span class="card-title">This Week</span>
-        <span class="card-amount">
-          {{ transactionSummary.weekIncome || '0.00' }}
-        </span>
+        <span class="card-amount">{{ transactionSummary.weekIncome || '0.00' }}</span>
         <span class="card-change">
-          {{ transactionSummary.weekIncomeChange }}% from last month
+          <span [ngClass]="
+                                                                              parseFloat(transactionSummary.weekIncomeChange) > 0 ? 'change-rate-positive'
+                                                                              : parseFloat(transactionSummary.weekIncomeChange) < 0 ? 'change-rate-negative'
+                                                                              : 'change-rate-neutral'
+                                                                            ">
+            <nz-icon [nzType]="
+                                                                                parseFloat(transactionSummary.weekIncomeChange) > 0 ? 'rise'
+                                                                                : parseFloat(transactionSummary.weekIncomeChange) < 0 ? 'fall'
+                                                                                : 'stock'
+                                                                              " nzTheme="outline"></nz-icon>
+            {{ transactionSummary.weekIncomeChange }}%
+          </span> from last week
         </span>
       </div>
     </nz-card>
     }
 
-    <!-- Total Expense -->
+    <!-- Month Income -->
     @if (transactionSummary?.currentExpense === undefined) {
-    <nz-skeleton [nzActive]="true" [nzTitle]="false" [nzParagraph]="{ rows: 3 }" class="summary-card" />
+    <nz-skeleton class="summary-card" [nzActive]="true" [nzTitle]="false" [nzParagraph]="{ rows: 3 }" />
     } @else {
     <nz-card class="summary-card" nzBordered>
       <div class="card-content">
         <span class="card-title">This Month</span>
-        <span class="card-amount">
-          {{ transactionSummary.monthIncome || '0.00' }}
-        </span>
+        <span class="card-amount">{{ transactionSummary.monthIncome || '0.00' }}</span>
         <span class="card-change">
-          {{ transactionSummary.monthIncomeChange }}% from last month
+          <span [ngClass]="
+                                                                              parseFloat(transactionSummary.monthIncomeChange) > 0 ? 'change-rate-positive'
+                                                                              : parseFloat(transactionSummary.monthIncomeChange) < 0 ? 'change-rate-negative'
+                                                                              : 'change-rate-neutral'
+                                                                            ">
+            <nz-icon [nzType]="
+                                                                                parseFloat(transactionSummary.monthIncomeChange) > 0 ? 'rise'
+                                                                                : parseFloat(transactionSummary.monthIncomeChange) < 0 ? 'fall'
+                                                                                : 'stock'
+                                                                              " nzTheme="outline"></nz-icon>
+            {{ transactionSummary.monthIncomeChange }}%
+          </span> from last month
         </span>
       </div>
     </nz-card>
     }
   </div>
   }
-
-
 
   <nz-tabset [nzSelectedIndex]="tabNames.indexOf(activeTab)" (nzSelectedIndexChange)="onNzTabChange($event)">
-
     @for(tab of tabNames; track tab) {
-    <nz-tab [nzTitle]="capitalize(tab)">
-    </nz-tab>
+    <nz-tab [nzTitle]="capitalize(tab)"></nz-tab>
     }
-
   </nz-tabset>
+
   <!-- Popup Form -->
   <app-popup-add-transaction-form [isVisible]="showAddTransactionForm()" [title]="'Enter Your Details'"
-    (closePopup)="onClosePopup()" (formSubmit)="onTransactionAdded()" (categoryAdded)="onCategoryAdded($event)"
-    (typeAdded)="onTypeAdded($event)" (paymentModeAdded)="onPaymentModeAdded($event)"
-    [transactionTypes]="transactionTypes()" (categoryRemoved)=" onCategoryRemoved($event)"
-    (typeRemoved)="onTypeRemoved($event)" (paymentModeRemoved)="onPaymentModeRemoved($event)"
-    [transactionCategories]="transactionCategories()" [transactionPaymentMode]="transactionPaymentMode()">
+    [transactionTypes]="transactionTypes()" [transactionCategories]="transactionCategories()"
+    [transactionPaymentMode]="transactionPaymentMode()" (closePopup)="onClosePopup()"
+    (formSubmit)="onTransactionAdded()" (categoryAdded)="onCategoryAdded($event)" (typeAdded)="onTypeAdded($event)"
+    (paymentModeAdded)="onPaymentModeAdded($event)" (categoryRemoved)="onCategoryRemoved($event)"
+    (typeRemoved)="onTypeRemoved($event)" (paymentModeRemoved)="onPaymentModeRemoved($event)">
   </app-popup-add-transaction-form>
 
-  <hr class="border-slate-100 border-1 mt-2">
+
+
   <!-- Tab Content -->
   <div>
     @if (isTabActive('overview')) {
-    <app-overview [userId]="userId" (navigateToAllTransaction)="navigateToAllTransactions()"></app-overview>
+    <app-overview [userId]="userId" (navigateToAllTransaction)="navigateToAllTransactions()">
+    </app-overview>
     } @else if (isTabActive('transaction')) {
     <app-all-transactions [userId]="userId" [transactionCategories]="transactionCategories()"
-      [transactionTypes]="transactionTypes()"
-      [transactionPaymentMode]="transactionPaymentMode()"></app-all-transactions>
+      [transactionTypes]="transactionTypes()" [transactionPaymentMode]="transactionPaymentMode()">
+    </app-all-transactions>
     }
   </div>
 </div>

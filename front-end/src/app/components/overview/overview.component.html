@@ -1,118 +1,82 @@
-<div class="flex flex-col md:flex-row justify-between w-full gap-2">
-  <div class="md:w-1/2 border border-gray-300 rounded-lg py-2 px-4 flex flex-col">
-    <!-- Header Section -->
-    <div class="mb-6 flex flex-col">
-      <span class="text-base md:text-lg font-bold">Recent Transactions</span>
-      @if (!isLoading) {
-      <span class="text-xs text-gray-500">You made {{this.transactionCount}} transactions this month</span>
-      } @else {
-      <!-- Skeleton for header text -->
-      <div class="h-4 w-48 bg-gray-200 rounded mt-1 animate-pulse"></div>
+<div class="flex flex-col md:flex-col justify-start gap-2 md:pb-2">
+
+  <div class="w-full">
+    <div class="flex justify-between  mb-4">
+      <div>
+        <div class="font-bold text-base">Recent Transactions</div>
+        <div class="text-xs text-gray-500 font-medium">You made {{this.transactionCount}} transactions this
+          month</div>
+      </div>
+
+    </div>
+
+    <div class="flex flex-col gap-4">
+      @for (transaction of transactionList; track transaction.transactionMasterId)
+      {
+      <app-transaction-card [transaction]="transaction" (deleteTransaction)="deleteTransaction($event)">
+      </app-transaction-card>
       }
     </div>
-
-    <!-- Transactions Table Section -->
-    <div class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
-          <tr>
-            <th></th>
-            <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date
-            </th>
-            <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Description</th>
-            <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Category</th>
-            <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mode
-            </th>
-            <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Amount</th>
-          </tr>
-        </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
-          @if (isLoading) {
-          <!-- Skeleton Rows for Loading State -->
-          @for (i of [1,2,3,4,5]; track i) {
-          <tr>
-            <td class="px-3 py-3 whitespace-nowrap">
-              <div class="h-4 w-16 bg-gray-200 rounded animate-pulse"></div>
-            </td>
-            <td class="px-3 py-3">
-              <div class="h-4 w-24 bg-gray-200 rounded animate-pulse"></div>
-              <div class="h-3 w-16 bg-gray-200 rounded animate-pulse mt-1"></div>
-            </td>
-            <td class="px-3 py-3 whitespace-nowrap">
-              <div class="h-6 w-20 bg-gray-200 rounded-full animate-pulse"></div>
-            </td>
-            <td class="px-3 py-3 whitespace-nowrap">
-              <div class="h-4 w-16 bg-gray-200 rounded animate-pulse"></div>
-            </td>
-            <td class="px-3 py-3 whitespace-nowrap">
-              <div class="h-4 w-12 bg-gray-200 rounded animate-pulse"></div>
-            </td>
-          </tr>
-          }
-          } @else {
-          <!-- Actual Data Rows -->
-          @for(transaction of transactionList; track transaction.transactionMasterId){
-          <tr>
-            <td>
-              <button type="button" (click)="deleteTransaction(transaction.transactionMasterId!)">Delete</button>
-            </td>
-            <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-500">
-              {{ transaction.transactionDate | date:'MMM d' }}
-            </td>
-            <td class="px-3 py-3 text-sm text-gray-900">
-              <span class="font-medium">{{ transaction.transactionDescription }}</span>
-              @if(transaction.transactionNote) {
-              <span class="block text-xs text-gray-500">
-                {{ transaction.transactionNote }}
-              </span>
-              }
-            </td>
-            <td class="px-3 py-3 whitespace-nowrap text-sm">
-              <!-- UPDATE: Using the dynamic styling function -->
-              <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full"
-                [ngClass]="getCategoryStyles(transaction.transactionCategoryMasterId)">
-                {{ transaction.transactionCategory || 'Uncategorized' }}
-              </span>
-            </td>
-            <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-500">
-              {{ transaction.transactionPaymentMode || "N/A" }}
-            </td>
-            <td class="px-3 py-3 whitespace-nowrap text-sm font-medium" [ngClass]="{
-                      'text-green-600': transaction.transactionTypeMasterId === 1,
-                      'text-red-600': transaction.transactionTypeMasterId !== 1
-                    }">
-              {{ transaction.transactionTypeMasterId === 1 ? '+' : '-' }}{{ transaction.transactionAmount }}
-            </td>
-          </tr>
-          }
-          <!-- Empty State when no transactions are found -->
-          @empty {
-          <tr>
-            <td colspan="5" class="px-6 py-8 text-center text-sm text-gray-500">
-              No recent transactions to display.
-            </td>
-          </tr>
-          }
-          }
-        </tbody>
-      </table>
+    <div class="w-full flex justify-end mb-2 mt-2">
+      <a (click)="navigateToAllTransactions()" class="text-xs font-semibold">View all transactions</a>
     </div>
-
-    <!-- "View All" Link Section -->
-    @if (!isLoading && transactionList.length > 0) {
-    <div class="mt-4 text-right">
-      <a class="text-sm font-medium text-blue-600 hover:text-blue-500 cursor-pointer"
-        (click)="navigateToAllTransactions()">
-        View all transactions →
-      </a>
-    </div>
-    }
-
   </div>
+  <div class=" bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-6 text-white shadow-lg">
+    <div class="text-lg font-bold mb-4 flex items-center gap-2  text-yellow-300">
+      <nz-icon nzType="thunderbolt" nzTheme="fill"></nz-icon>
+      Quick Actions
+    </div>
 
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
 
+      <!-- Add Transaction -->
+      <button
+        class="bg-white/20 hover:bg-white/30 rounded-xl p-4 transition-all duration-200 text-center group hover:scale-105 active:scale-95">
+        <div class="flex flex-col items-center space-y-2">
+          <div
+            class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center group-hover:bg-white/30 transition-colors">
+            <span nz-icon nzType="plus" nzTheme="outline" class="text-xl text-white"></span>
+          </div>
+          <span class="text-sm font-medium">Add Transaction</span>
+        </div>
+      </button>
 
+      <!-- Show All Transactions -->
+      <button
+        class="bg-white/20 hover:bg-white/30 rounded-xl p-4 transition-all duration-200 text-center group hover:scale-105 active:scale-95">
+        <div class="flex flex-col items-center space-y-2">
+          <div
+            class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center group-hover:bg-white/30 transition-colors">
+            <span nz-icon nzType="unordered-list" nzTheme="outline" class="text-xl text-white"></span>
+          </div>
+          <span class="text-sm font-medium">All Transactions</span>
+        </div>
+      </button>
+
+      <!-- View Reports -->
+      <button
+        class="bg-white/20 hover:bg-white/30 rounded-xl p-4 transition-all duration-200 text-center group hover:scale-105 active:scale-95">
+        <div class="flex flex-col items-center space-y-2">
+          <div
+            class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center group-hover:bg-white/30 transition-colors">
+            <span nz-icon nzType="bar-chart" nzTheme="outline" class="text-xl text-white"></span>
+          </div>
+          <span class="text-sm font-medium">View Reports</span>
+        </div>
+      </button>
+
+      <!-- Set Budget -->
+      <button
+        class="bg-white/20 hover:bg-white/30 rounded-xl p-4 transition-all duration-200 text-center group hover:scale-105 active:scale-95">
+        <div class="flex flex-col items-center space-y-2">
+          <div
+            class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center group-hover:bg-white/30 transition-colors">
+            <span nz-icon nzType="wallet" nzTheme="outline" class="text-xl text-white"></span>
+          </div>
+          <span class="text-sm font-medium">Set Budget</span>
+        </div>
+      </button>
+
+    </div>
+  </div>
 </div>

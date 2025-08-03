@@ -10,6 +10,7 @@
   },
   "private": true,
   "dependencies": {
+    "@angular/cdk": "~20.1.2",
     "@angular/common": "^20.1.2",
     "@angular/compiler": "^20.1.2",
     "@angular/core": "^20.1.2",
@@ -20,7 +21,8 @@
     "@tailwindcss/postcss": "^4.0.15",
     "chart.js": "^4.5.0",
     "flowbite": "^3.1.2",
-    "lucide": "^0.525.0",
+    "lucide": "^0.533.0",
+    "lucide-angular": "^0.533.0",
     "ng-zorro-antd": "^20.1.0",
     "postcss": "^8.5.3",
     "rxjs": "~7.8.0",

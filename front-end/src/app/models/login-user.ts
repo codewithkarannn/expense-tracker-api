@@ -3,12 +3,20 @@ export interface LoginUser {
   password: string;
 }
 
+export interface UserDetails {
+  userEmail: string;
+  firstName: string;
+  lastName: string;
+  userMastrerId: string;
+  userRoleId: number;
+  userRole: string;
+}
+
 // TransactionType interface
 export interface TransactionType {
   transactionTypeMasterId: number;
   transactionTypename: string;
-  isCustom : boolean ;
- 
+  isCustom: boolean;
 }
 
 //Transaction category interface
@@ -19,7 +27,7 @@ export interface TransactionCategory {
 }
 
 export interface TransactionPaymentMode {
-  paymentModeId: number | null; // Nullable number  
+  paymentModeId: number | null; // Nullable number
   paymentMode: string;
   isActive: number; // sbyte in C# is a signed byte (0-255), represented as number in TypeScript
   userMasterId: string | null; // Guid in C# maps to string in TypeScript
@@ -30,7 +38,6 @@ export interface AddTransactionTypeMasterDTO {
   transactionTypeMasterId: number | null;
   userMasterId: string; // GUID is represented as string in TypeScript
   transactionTypename: string | null; // Nullable string
-
 }
 
 export interface AddTransactionCategoryMasterDTO {
