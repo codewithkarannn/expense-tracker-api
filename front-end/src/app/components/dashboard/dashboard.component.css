@@ -151,8 +151,8 @@
 
 .card-amount {
   font-weight: 700; /* Corresponds to font-bold */
-  font-size: 1.25rem; /* Corresponds to text-xl */
-  margin-top: 0.25rem; /* Corresponds to mt-1 */
+  font-size: 32px; /* Corresponds to text-xl */
+  margin-bottom: 0.25rem; /* Corresponds to mt-1 */
 }
 
 .card-change {
@@ -171,8 +171,18 @@
     font-size: 1rem; /* Corresponds to sm:text-base */
   }
   .card-amount {
-    font-size: 1.5rem; /* Corresponds to sm:text-2xl */
+    font-size:42px; /* Corresponds to sm:text-2xl */
   }
+  .summary-card .card-content {
+  display: flex;
+  flex-direction: column;
+  align-items: left;
+  justify-content: left;
+  text-align: left;
+  width: 100%;
+  height: 100%;
+}
+
 }
 
 /* Medium screens and up (768px) */
@@ -283,7 +293,7 @@
 }
 
 .total-balance-content .amount {
-  font-size: 1.5rem;
+  font-size: 2.5rem;
   font-weight: bold;
   margin-top: 0.3rem;
   display: block;

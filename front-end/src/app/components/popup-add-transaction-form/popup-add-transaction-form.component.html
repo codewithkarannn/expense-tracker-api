@@ -1,287 +1,173 @@
+<nz-modal [nzVisible]="isVisible()" (nzOnCancel)="close()" (nzOnOk)="transactionForm.ngSubmit.emit()"
+  [nzOkText]="isSubmitting ? 'Submitting...' : 'Add Transaction'" [nzOkLoading]="isSubmitting" [nzWidth]="640"
+  nzTitle="Add New Transaction" nzWrapClassName="transaction-modal" [nzMaskClosable]="false">
 
-@if(isVisible()) {
-<div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" (click)="close()">
-  <div class="relative bg-white rounded-lg shadow-lg p-6 w-full max-w-xl mx-4" (click)="$event.stopPropagation()">
-    <!-- Header -->
-    <div class="flex w-full justify-between items-start mb-4">
-      <div class="flex flex-col gap-1">
-        <span class="text-xl font-bold text-gray-800">Add New Transaction</span>
-        <span class="text-sm text-gray-500">Enter the details of your transaction below</span>
-      </div>
-      <button (click)="close()" class="text-gray-500 hover:text-gray-700">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd"
-            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-            clip-rule="evenodd" />
-        </svg>
-      </button>
-    </div>
+  <!-- The content of the modal, which will become scrollable on mobile -->
+  <ng-container *nzModalContent>
+    <form nz-form [nzLayout]="'vertical'" #transactionForm="ngForm" (ngSubmit)="onSubmit()">
 
-    <!-- UPDATE: Added #transactionForm and (ngSubmit) -->
-    <form #transactionForm="ngForm" (ngSubmit)="onSubmit()" class="space-y-4">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <!-- Type Dropdown (NOW SEARCHABLE & VALIDATED) -->
-        <div class="space-y-1">
-          <!-- UPDATE: Added required indicator -->
-          <label class="block text-sm font-medium text-gray-700">Type <span class="text-red-500">*</span></label>
-          <!-- UPDATE: Hidden input for validation -->
-          <input type="hidden" [(ngModel)]="transaction.transactionTypeMasterId" name="transactionTypeMasterId" required
-            #type="ngModel">
-          <div class="relative">
-            <button type="button" (click)="toggleDropdown()" [class.border-red-500]="type.invalid && type.touched"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-left flex justify-between items-center bg-white">
-              <span class="truncate">{{ getSelectedTransactionType() || 'Select type' }}</span>
-              <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                transform="rotate(90)">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4" />
-              </svg>
-            </button>
-             @if(dropdownOpen()) {
-            <div class="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg">
-              <!-- ADD: Search input -->
-              <div class="p-2">
-                <input type="text" [(ngModel)]="typeSearchTerm" [ngModelOptions]="{standalone: true}"
-                  (click)="$event.stopPropagation()" placeholder="Search type..."
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500" />
-              </div>
-              <ul class="py-1 max-h-60 overflow-y-auto">
-                <!-- CHANGE: Iterate over the filtered list -->
-                @for (type of filteredTransactionTypes(); track type.transactionTypeMasterId) {
-                <li class="flex px-4 py-2  justify-between items-center  hover:bg-gray-100">
-                  <button type="button" (click)="selectTransactionType(type.transactionTypeMasterId)"
-                    class="w-full text-left   text-sm ">
-                    {{ type.transactionTypename }}
-                  </button>
-                  @if(type.isCustom == true) {
 
-                  <button class="text-white bg-red-500 rounded-sm w-14  text-xs px-2 py-1  text-left"
-                    (click)="removeType(type.transactionTypeMasterId)">
-                    Remove
+      <div class="flex justify-between items-center">
+        <!-- 1. Type Dropdown -->
+        <nz-form-item class="flex-grow mb-0">
+          <nz-form-label nzRequired nzRequired class="block text-sm font-medium text-gray-700 mb-1">Type</nz-form-label>
+          <nz-form-control nzErrorTip="Type is required.">
+            <nz-select [(ngModel)]="transaction.transactionTypeMasterId" name="transactionTypeMasterId" required
+              nzPlaceHolder="Select or search for a type" [nzShowSearch]="true"
+              (nzOnSearch)="typeSearchTerm.set($event)" [nzDropdownRender]="typeDropdownTpl">
+              @for (type of filteredTransactionTypes(); track type.transactionTypeMasterId) {
+              <nz-option [nzValue]="type.transactionTypeMasterId" [nzLabel]="type.transactionTypename">
+                <div class="flex justify-between items-center w-full">
+                  <span>{{ type.transactionTypename }}</span>
+                  @if(type.isCustom) {
+                  <button nz-button nzType="text" nzSize="small" nzDanger
+                    (click)="removeType(type.transactionTypeMasterId); $event.stopPropagation()">
+                    <i nz-icon nzType="delete" nzTheme="outline"></i>
                   </button>
                   }
-                </li>
-                } @empty {
-                <div class="flex justify-between p-2 items-center">
-                  <li class="px-4 py-2 text-sm  flex flex-col">{{typeSearchTerm()}} <span
-                      class="text-xs  text-red-400 ">Not found</span> </li>
-
-                  <button class="p-2 bg-black text-white text-xs rounded-md h-8 items-center flex hover:font-semibold "
-                    (click)="addNewType()">Add</button>
                 </div>
-
-                }
-              </ul>
-            </div>
-            }
-          </div>
-          <!-- UPDATE: Validation message -->
-          @if (type.invalid && type.touched) {
-          <p class="text-red-500 text-xs mt-1">Type is required.</p>
-          }
-        </div>
-
-        <!-- Category Dropdown (NOW SEARCHABLE & VALIDATED) -->
-        <div class="space-y-1">
-          <!-- UPDATE: Added required indicator -->
-          <label class="block text-sm font-medium text-gray-700">Category <span class="text-red-500">*</span></label>
-          <!-- UPDATE: Hidden input for validation -->
-          <input type="hidden" [(ngModel)]="transaction.transactionCategoryMasterId" name="transactionCategoryMasterId"
-            required #category="ngModel">
-          <div class="relative">
-            <button type="button" (click)="toggleCategoryDropdown()"
-              [class.border-red-500]="category.invalid && category.touched"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-left flex justify-between items-center bg-white">
-              <span class="truncate">{{ getSelectedCategory() || 'Select category' }}</span>
-              <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                transform="rotate(90)">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4" />
-              </svg>
-            </button>
-            @if(categoryDropdownOpen()) {
-            @if(categoryDropdownOpen()) {
-            <div class="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg">
-              <!-- ADD: Search input -->
-              <div class="p-2">
-                <input type="text" [(ngModel)]="categorySearchTerm" [ngModelOptions]="{standalone: true}"
-                  (click)="$event.stopPropagation()" placeholder="Search category..."
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500" />
-              </div>
-              <ul class="py-1 max-h-60 overflow-y-auto">
-                <!-- CHANGE: Iterate over the filtered list -->
-                @for (category of filteredTransactionCategories(); track category.transactionCategoryMasterId) {
-                <li class="flex px-4 py-2  justify-between items-center  hover:bg-gray-100">
-                  <button type="button" (click)="selectCategory(category.transactionCategoryMasterId)">
-                    {{ category.transactionCategoryName }}
-                  </button>
-                  @if(category.isCustom == true) {
-
-                  <button class="text-white bg-red-500 rounded-sm w-14  text-xs px-2 py-1  text-left"
-                    (click)="removeCategory(category.transactionCategoryMasterId)">
-                    Remove
-                  </button>
-                  }
-                </li>
-                } @empty {
-                <div class="flex justify-between p-2 items-center">
-                  <li class="px-4 py-2 text-sm  flex flex-col">{{categorySearchTerm()}} <span
-                      class="text-xs  text-red-400 ">Not
-                      found</span> </li>
-
-                  <button class="p-2 bg-black text-white rounded-md h-8 items-center flex hover:font-semibold "
-                    (click)="addNewCategory()">Add</button>
-                </div>
-
-                }
-              </ul>
-            </div>
-            }
-            }
-          </div>
-          <!-- UPDATE: Validation message -->
-          @if (category.invalid && category.touched) {
-          <p class="text-red-500 text-xs mt-1">Category is required.</p>
-          }
-        </div>
+              </nz-option>
+              }
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
       </div>
 
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <!-- Description -->
-        <div class="space-y-1">
-          <!-- UPDATE: Added required indicator -->
-          <label class="block text-sm font-medium text-gray-700">Description <span class="text-red-500">*</span></label>
-          <!-- UPDATE: Added required, name, #description, and validation class -->
-          <input type="text" [(ngModel)]="transaction.transactionDescription" name="transactionDescription" required
-            #description="ngModel"
-            [class.border-red-500]="description.invalid && (description.dirty || description.touched)"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+      <!-- 2. Category Dropdown -->
+      <nz-form-item>
+        <nz-form-label nzRequired class="block text-sm font-medium text-gray-700 mb-1"
+          nzRequired>Category</nz-form-label>
+        <nz-form-control nzErrorTip="Category is required.">
+          <nz-select [(ngModel)]="transaction.transactionCategoryMasterId" name="transactionCategoryMasterId" required
+            nzPlaceHolder="Select or search for a category" [nzShowSearch]="true"
+            (nzOnSearch)="categorySearchTerm.set($event)" [nzDropdownRender]="categoryDropdownTpl">
+            @for (category of filteredTransactionCategories(); track category.transactionCategoryMasterId) {
+            <nz-option [nzValue]="category.transactionCategoryMasterId" [nzLabel]="category.transactionCategoryName">
+              <div class="flex justify-between items-center w-full">
+                <span>{{ category.transactionCategoryName }}</span>
+                @if(category.isCustom) {
+                <button nz-button nzType="text" nzSize="small" nzDanger
+                  (click)="removeCategory(category.transactionCategoryMasterId); $event.stopPropagation()">
+                  <i nz-icon nzType="delete" nzTheme="outline"></i>
+                </button>
+                }
+              </div>
+            </nz-option>
+            }
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- 3. Description -->
+      <nz-form-item>
+        <nz-form-label nzRequired class="block text-sm font-medium text-gray-700 mb-1"
+          nzRequired>Description</nz-form-label>
+        <nz-form-control nzErrorTip="Description is required.">
+          <input nz-input [(ngModel)]="transaction.transactionDescription" name="transactionDescription" required
             placeholder="e.g., Grocery Shopping" />
-          <!-- UPDATE: Validation message -->
-          @if (description.invalid && (description.dirty || description.touched)) {
-          <p class="text-red-500 text-xs mt-1">Description is required.</p>
-          }
-        </div>
+        </nz-form-control>
+      </nz-form-item>
 
-        <!-- Amount -->
-        <div class="space-y-1">
-          <!-- UPDATE: Added required indicator -->
-          <label class="block text-sm font-medium text-gray-700">Amount <span class="text-red-500">*</span></label>
-          <div class="relative">
-            <!-- UPDATE: Added required, name, #amount, min, and validation class -->
-            <input type="number" [(ngModel)]="transaction.transactionAmount" name="transactionAmount" required
-              min="0.01" #amount="ngModel"
-              [class.border-red-500]="amount.invalid && (amount.dirty || amount.touched)"
-              class="w-full pl-4 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="0.00" step="0.01" />
-          </div>
-          <!-- UPDATE: Validation message -->
-          @if (amount.invalid && (amount.dirty || amount.touched)) {
-          @if(amount.errors?.['required']) {
-          <p class="text-red-500 text-xs mt-1">Amount is required.</p>
-          }
-          @if(amount.errors?.['min']) {
-          <p class="text-red-500 text-xs mt-1">Amount must be greater than 0.</p>
-          }
-          }
-        </div>
-      </div>
+      <!-- 4. Amount -->
+      <nz-form-item>
+        <nz-form-label nzRequired class="block text-sm font-medium text-gray-700 mb-1" nzRequired>Amount</nz-form-label>
+        <nz-form-control nzErrorTip="Amount must be greater than 0.">
+          <nz-input-number [(ngModel)]="transaction.transactionAmount" name="transactionAmount" required [nzMin]="0.01"
+            [nzStep]="0.01" [nzPlaceHolder]="'0.00'" class="w-full" />
+        </nz-form-control>
+      </nz-form-item>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <!-- Payment Mode Dropdown (VALIDATED) -->
-        <div class="space-y-1">
-          <!-- UPDATE: Added required indicator -->
-          <label class="block text-sm font-medium text-gray-700">Payment mode <span class="text-red-500">*</span></label>
-          <!-- UPDATE: Hidden input for validation -->
-          <input type="hidden" [(ngModel)]="transaction.transactionPaymentModeId" name="paymentModeId" required
-            #paymentMode="ngModel">
-          <div class="relative">
-            <button type="button" (click)="toggleModeDropdown()"
-              [class.border-red-500]="paymentMode.invalid && paymentMode.touched"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-left flex justify-between items-center bg-white">
-              <span class="truncate">{{ getSelectedPaymentMode() || 'Select mode' }}</span>
-              <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                transform="rotate(90)">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4" />
-              </svg>
-            </button>
-            @if(paymentmodeDropdownOpen()) {
-            @if(paymentmodeDropdownOpen()) {
-            <div class="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg">
-              <!-- ADD: Search input -->
-              <div class="p-2">
-                <input type="text" [(ngModel)]="payementModeSearchTerm" [ngModelOptions]="{standalone: true}"
-                  (click)="$event.stopPropagation()" placeholder="Search type..."
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500" />
-              </div>
-              <ul class="py-1 max-h-60 overflow-y-auto">
-                <!-- CHANGE: Iterate over the filtered list -->
-                @for (mode of filteredTransactionPaymentMode(); track mode.paymentModeId) {
-                <li class="flex px-4 py-2  justify-between items-center  hover:bg-gray-100">
-                  <button type="button" (click)="selectPaymentMode(mode.paymentModeId ??0)"
-                    class="w-full text-left   text-sm ">
-                    {{ mode.paymentMode }}
-                  </button>
-                  @if(mode.isCustom == true) {
-
-                  <button class="text-white bg-red-500 rounded-sm w-14  text-xs px-2 py-1  text-left"
-                    (click)="removePaymentMode(mode.paymentModeId ?? 0)">
-                    Remove
-                  </button>
-                  }
-                </li>
-                } @empty {
-                <div class="flex justify-between p-2 items-center">
-                  <li class="px-4 py-2 text-sm  flex flex-col">{{payementModeSearchTerm()}} <span
-                      class="text-xs  text-red-400 ">Not found</span> </li>
-
-                  <button class="p-2 bg-black text-white text-xs rounded-md h-8 items-center flex hover:font-semibold "
-                    (click)="addPaymentMode()">Add</button>
-                </div>
-
+      <!-- 5. Payment Mode Dropdown -->
+      <nz-form-item>
+        <nz-form-label nzRequired class="block text-sm font-medium text-gray-700 mb-1" nzRequired>Payment
+          Mode</nz-form-label>
+        <nz-form-control nzErrorTip="Payment mode is required.">
+          <nz-select [(ngModel)]="transaction.transactionPaymentModeId" name="paymentModeId" required
+            nzPlaceHolder="Select or search for a mode" [nzShowSearch]="true"
+            (nzOnSearch)="payementModeSearchTerm.set($event)" [nzDropdownRender]="modeDropdownTpl">
+            @for (mode of filteredTransactionPaymentMode(); track mode.paymentModeId) {
+            <nz-option [nzValue]="mode.paymentModeId" [nzLabel]="mode.paymentMode">
+              <div class="flex justify-between items-center w-full">
+                <span>{{ mode.paymentMode }}</span>
+                @if(mode.isCustom) {
+                <button nz-button nzType="text" nzSize="small" nzDanger
+                  (click)="removePaymentMode(mode.paymentModeId ?? 0); $event.stopPropagation()">
+                  <i nz-icon nzType="delete" nzTheme="outline"></i>
+                </button>
                 }
-              </ul>
-            </div>
+              </div>
+            </nz-option>
             }
-            }
-          </div>
-          <!-- UPDATE: Validation message -->
-          @if (paymentMode.invalid && paymentMode.touched) {
-          <p class="text-red-500 text-xs mt-1">Payment mode is required.</p>
-          }
-        </div>
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
 
-        <!-- Date Picker -->
-        <div class="space-y-1">
-          <!-- UPDATE: Added required indicator -->
-          <label class="block text-sm font-medium text-gray-700">Date <span class="text-red-500">*</span></label>
-          <!-- UPDATE: Added required, name, #date, and validation class -->
-          <input type="date" [(ngModel)]="transaction.transactionDate" name="transactionDate" required #date="ngModel"
-            [class.border-red-500]="date.invalid && (date.dirty || date.touched)"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" />
-          <!-- UPDATE: Validation message -->
-          @if (date.invalid && (date.dirty || date.touched)) {
-          <p class="text-red-500 text-xs mt-1">Date is required.</p>
-          }
-        </div>
+      <!-- 6. Date Picker -->
+      <nz-form-item>
+        <nz-form-label nzRequired class="block text-sm font-medium text-gray-700 mb-1" nzRequired>Date</nz-form-label>
+        <nz-form-control nzErrorTip="Date is required.">
+          <nz-date-picker [(ngModel)]="transaction.transactionDate" name="transactionDate" required class="w-full">
+          </nz-date-picker>
+        </nz-form-control>
+      </nz-form-item>
+
+
+
+      <!-- 7. Notes Textarea (Optional) -->
+      <div class="flex flex-col gap-2">
+        <nz-form-item>
+
+          <nz-form-label nzRequired class="text-sm font-medium text-gray-700 mb-1">Notes</nz-form-label>
+          <nz-form-control>
+            <textarea nz-input [(ngModel)]="transaction.transactionNote" name="transactionNote"
+              [nzAutosize]="{ minRows: 3, maxRows: 5 }"
+              placeholder="Any additional notes about this transaction..."></textarea>
+          </nz-form-control>
+        </nz-form-item>
       </div>
 
-      <!-- Notes Textarea (Optional) -->
-      <div class="space-y-1">
-        <label class="block text-sm font-medium text-gray-700">Notes</label>
-        <textarea [(ngModel)]="transaction.transactionNote" name="transactionNote" rows="3"
-          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="Any additional notes about this transaction..."></textarea>
-      </div>
-
-      <!-- Submit Button -->
-      <div class="pt-2">
-        <!-- UPDATE: Changed to type="submit" and added [disabled] binding -->
-        <button type="submit" [disabled]="transactionForm.invalid"
-          class="w-full bg-black hover:bg-black text-white font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed">
-          Add Transaction
-        </button>
-      </div>
     </form>
+  </ng-container>
+
+  <ng-template #modalTitle>
+    <div class="flex flex-col">
+      <span class="text-xl font-bold text-gray-800">Add New Transaction</span>
+      <span class="text-sm text-gray-500">Enter the details of your transaction</span>
+    </div>
+  </ng-template>
+</nz-modal>
+
+<!-- ============================================================== -->
+<!-- TEMPLATES FOR CUSTOM DROPDOWN FOOTERS ("ADD NEW" FUNCTIONALITY) -->
+<!-- ============================================================== -->
+
+<ng-template #typeDropdownTpl>
+  @if (!filteredTransactionTypes().length && typeSearchTerm()) {
+  <nz-divider class="my-1"></nz-divider>
+  <div class="flex justify-between items-center p-2">
+    <span class="text-gray-500 text-sm">Add "{{ typeSearchTerm() }}"</span>
+    <button nz-button nzType="primary" nzSize="small" (click)="addNewType()">Add</button>
   </div>
-</div>
-}
+  }
+</ng-template>
+
+<ng-template #categoryDropdownTpl>
+  @if (!filteredTransactionCategories().length && categorySearchTerm()) {
+  <nz-divider class="my-1"></nz-divider>
+  <div class="flex justify-between items-center p-2">
+    <span class="text-gray-500 text-sm">Add "{{ categorySearchTerm() }}"</span>
+    <button nz-button nzType="primary" nzSize="small" (click)="addNewCategory()">Add</button>
+  </div>
+  }
+</ng-template>
+
+<ng-template #modeDropdownTpl>
+  @if (!filteredTransactionPaymentMode().length && payementModeSearchTerm()) {
+  <nz-divider class="my-1"></nz-divider>
+  <div class="flex justify-between items-center p-2">
+    <span class="text-gray-500 text-sm">Add "{{ payementModeSearchTerm() }}"</span>
+    <button nz-button nzType="primary" nzSize="small" (click)="addPaymentMode()">Add</button>
+  </div>
+  }
+</ng-template>
