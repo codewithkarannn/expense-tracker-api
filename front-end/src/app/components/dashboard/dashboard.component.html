@@ -74,15 +74,12 @@
         <span class="card-amount">{{ transactionSummary.todayExpense || '0.00' }}</span>
         <span class="card-change">
           <span [ngClass]="
-                                                                              parseFloat(transactionSummary.dayExpenseChange) > 0 ? 'change-rate-negative'
-                                                                              : parseFloat(transactionSummary.dayExpenseChange) < 0 ? 'change-rate-positive'
-                                                                              : 'change-rate-neutral'
-                                                                            ">
-            <nz-icon [nzType]="
-                                                                                parseFloat(transactionSummary.dayExpenseChange) > 0 ? 'rise'
-                                                                                : parseFloat(transactionSummary.dayExpenseChange) < 0 ? 'fall'
-                                                                                : 'stock'
-                                                                              " nzTheme="outline"></nz-icon>
+            parseFloat(transactionSummary.dayExpenseChange) > 0 ? 'change-rate-negative'
+            : parseFloat(transactionSummary.dayExpenseChange) < 0 ? 'change-rate-positive'
+            : 'change-rate-neutral'">
+            <nz-icon [nzType]="parseFloat(transactionSummary.dayExpenseChange) > 0 ? 'rise'
+            : parseFloat(transactionSummary.dayExpenseChange) < 0 ? 'fall'
+            : 'stock'" nzTheme="outline"></nz-icon>
             {{ transactionSummary.dayExpenseChange }}%
           </span> from yesterday
         </span>

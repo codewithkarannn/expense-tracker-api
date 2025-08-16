@@ -37,8 +37,7 @@
                 </ng-template>
               </nz-form-control>
             </nz-form-item>
-            <button nz-button class="form-item-gap" nzType="primary" (click)="login()" style="width: 100%"
-              [nzLoading]="isLoading">
+            <button nz-button class="form-item-gap" nzType="primary" style="width: 100%" [nzLoading]="isLoading">
               @if (isLoading) {
               <span>Logging in...</span>
               } @else {

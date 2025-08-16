@@ -10,7 +10,7 @@ import { RegisterUser } from '../models/register-user';
 })
 export class AuthService {
   // private baseUrl: string = 'https://localhost:7238/api';
-  private baseUrl: string = 'http://expenser-tracker.runasp.net/api';
+  private baseUrl: string = 'https://expenser-tracker.runasp.net/api';
   // private tokenKey: string = " ";
   httpClient: HttpClient;
 

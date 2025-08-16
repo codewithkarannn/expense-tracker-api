@@ -1,0 +1,130 @@
+﻿using Budget_Tracker_WebAPI.Models;
+
+namespace Budget_Tracker_WebAPI.DTOs
+{
+    public class TransactionDTO
+    {
+        public Guid? TransactionMasterId { get; set; } = Guid.Empty;
+
+        public Guid UserId { get; set; }
+
+        public int TransactionTypeMasterId { get; set; }
+       
+
+        public int TransactionCategoryMasterId { get; set; }
+        public int? TransactionPaymentModeId { get; set; }
+
+        public string? TransactionPaymentMode { get; set; } = null!;
+
+        public string TransactionDescription { get; set; } = null!;
+
+        public double TransactionAmount { get; set; }
+
+        public DateTime TransactionDate { get; set; }
+
+        public string? TransactionNote { get; set; }
+
+        public sbyte? IsActive { get; set; }
+
+        public string? TransactionType { get; set; }
+        public string?  TransactionCategory { get; set; }
+        public DateTime? CreatedAt { get; set; }
+
+        public DateTime? DeletedAt { get; set; }
+
+    }
+
+
+    public partial class TransactionCategoryMasterDTO
+    {
+        public int TransactionCategoryMasterId { get; set; }
+
+        public string TransactionCategoryName { get; set; } = null!;
+        public bool? IsCustom { get; set; } = false!;
+
+
+    }
+
+
+    public partial class AddTransactionCategoryMasterDTO
+    {
+        public int? TransactionCategoryMasterId { get; set; }
+
+        public string TransactionCategoryName { get; set; } = null!;
+
+        public Guid UserMasterId { get; set; }
+
+    }
+    public partial class TransactionTypeMasterDTO
+    {
+        public int TransactionTypeMasterId { get; set; }
+
+        public string? TransactionTypename { get; set; }
+
+
+        public bool? IsCustom { get; set; } = false!;
+
+    }
+
+    public partial class AddTransactionTypeMasterDTO
+    {
+        public int? TransactionTypeMasterId { get; set; }
+        public Guid UserMasterId { get; set; }
+
+        public string? TransactionTypename { get; set; }
+
+
+
+
+    }
+
+
+ 
+    public class EditTransactionDTO
+    {
+        public Guid TransactionMasterId { get; set; }
+
+        public Guid UserId { get; set; }
+
+        public int TransactionTypeMasterId { get; set; }
+
+        public int TransactionCategoryMasterId { get; set; }
+
+
+        public int TransactionPaymentModeId { get; set; }
+
+        public string TransactionPaymentMode { get; set; } = null!;
+
+        public string TransactionDescription { get; set; } = null!;
+
+        public double TransactionAmount { get; set; }
+
+        public DateTime TransactionDate { get; set; }
+
+        public string? TransactionNote { get; set; }
+
+        public sbyte? IsActive { get; set; }
+
+        public string? TransactionType { get; set; }
+        public string? TransactionCategory { get; set; }
+        public DateTime? CreatedAt { get; set; }
+
+        public DateTime? DeletedAt { get; set; }
+
+    }
+
+
+    public  class TransactionPaymentModeDTO
+    {
+        public int? PaymentModeId { get; set; }
+
+        public string PaymentMode { get; set; } = null!;
+
+        public sbyte IsActive { get; set; }
+
+        public Guid? UserMasterId { get; set; }
+
+        public bool IsCustom { get; set; }
+    }
+
+}
