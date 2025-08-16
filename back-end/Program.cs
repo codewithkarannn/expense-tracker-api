@@ -73,7 +73,7 @@ app.UseForwardedHeaders();
 // The order of the following middleware is critical for proper functioning.
 
 // 1. Exception handling (early in the pipeline)
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 {
     // Use developer-friendly tools ONLY in the Development environment.
     app.UseDeveloperExceptionPage();
