@@ -15,15 +15,15 @@ namespace Budget_Tracker_WebAPI.Repositories
 
         }
 
-        public async Task<TransactionDTO> AddTransaction(TransactionMaster transaction)
+        public TransactionDTO AddTransaction(TransactionMaster transaction)
         {
 
             try
             {
 
 
-                var newEntity = await db.TransactionMasters.AddAsync(transaction);
-                db.SaveChangesAsync();
+                var newEntity =  db.TransactionMasters.Add(transaction);
+                db.SaveChanges();
 
                 return new TransactionDTO
                 {
@@ -50,15 +50,15 @@ namespace Budget_Tracker_WebAPI.Repositories
             }
         }
 
-        public async Task<TransactionCategoryMasterDTO> AddTransactionCategory(TransactionCategoryMaster model)
+        public TransactionCategoryMasterDTO AddTransactionCategory(TransactionCategoryMaster model)
         {
 
             try
             {
 
 
-                var newEntity = await db.TransactionCategoryMasters.AddAsync(model);
-                db.SaveChangesAsync();
+                var newEntity =  db.TransactionCategoryMasters.Add(model);
+                db.SaveChanges();
 
                 return new TransactionCategoryMasterDTO
                 {
@@ -75,15 +75,15 @@ namespace Budget_Tracker_WebAPI.Repositories
             }
         }
 
-        public async Task<TransactionTypeMasterDTO> AddTransactionType(TransactionTypeMaster model)
+        public  TransactionTypeMasterDTO AddTransactionType(TransactionTypeMaster model)
         {
 
             try
             {
 
 
-                var newEntity = await db.TransactionTypeMasters.AddAsync(model);
-                db.SaveChangesAsync();
+                var newEntity =  db.TransactionTypeMasters.Add(model);
+                db.SaveChanges();
 
                 return new TransactionTypeMasterDTO
                 {
@@ -101,15 +101,15 @@ namespace Budget_Tracker_WebAPI.Repositories
             }
         }
 
-        public async Task<TransactionPaymentModeDTO> AddPaymentMode(TransactionPaymentMode model)
+        public TransactionPaymentModeDTO AddPaymentMode(TransactionPaymentMode model)
         {
 
             try
             {
 
 
-                var newEntity = await db.TransactionPaymentModes.AddAsync(model);
-                db.SaveChangesAsync();
+                var newEntity =  db.TransactionPaymentModes.Add(model);
+                db.SaveChanges();
 
                 return new TransactionPaymentModeDTO
                 {
@@ -285,7 +285,7 @@ namespace Budget_Tracker_WebAPI.Repositories
         {
             try
             {
-                return await db.TransactionMasters
+                return await db.TransactionMasters.AsNoTracking()
                     .Include(i => i.TransactionCategoryMaster)
                     .Include(i => i.TransactionTypeMaster)
                     .Include(i => i.TransactionPaymentmode)
@@ -323,7 +323,7 @@ namespace Budget_Tracker_WebAPI.Repositories
         {
             try
             {
-                var transaction = db.TransactionMasters
+                var transaction = db.TransactionMasters.AsNoTracking()
                     .Include(i => i.TransactionCategoryMaster)
                     .Include(i => i.TransactionTypeMaster)
                     .Where(i => i.TransactionMasterId == transactionMasterID && i.IsActive == 1)
@@ -405,7 +405,7 @@ namespace Budget_Tracker_WebAPI.Repositories
             try
             {
                 var model = db.TransactionCategoryMasters
-
+                    .AsNoTracking()
                     .Where(i => i.TransactionCategoryMasterId == transactionCategoryMasterId && i.IsActive == 1)
                     .Select(t => new TransactionCategoryMaster
                     {
@@ -569,7 +569,10 @@ namespace Budget_Tracker_WebAPI.Repositories
 
 
 
-                var transactionsTypes = db.TransactionTypeMasters.Where(i => i.IsActive == 1 && (i.UserMasterId == userMasterID || i.UserMasterId == null)).Select(i =>
+                var transactionsTypes = db.TransactionTypeMasters
+                    .AsNoTracking()
+                    .Where(i => i.IsActive == 1 && (i.UserMasterId == userMasterID || i.UserMasterId == null))
+                    .Select(i =>
 
                     new TransactionTypeMasterDTO
                     {
@@ -596,7 +599,7 @@ namespace Budget_Tracker_WebAPI.Repositories
 
 
 
-                var transactionsPayementModes = db.TransactionPaymentModes.Where(i => i.IsActive == 1 /*&& (i.UserMasterId == userMasterID || i.UserMasterId == null)*/).Select(i =>
+                var transactionsPayementModes = db.TransactionPaymentModes.AsNoTracking().Where(i => i.IsActive == 1 /*&& (i.UserMasterId == userMasterID || i.UserMasterId == null)*/).Select(i =>
 
                     new TransactionPaymentModeDTO
                     {
@@ -757,7 +760,7 @@ namespace Budget_Tracker_WebAPI.Repositories
                 .Include(i => i.TransactionPaymentmode)
 
                 .Include(i => i.TransactionCategoryMaster)
-                .Where(t => t.UserId == userId);
+                .Where(t => t.UserId == userId && t.IsActive ==1);
 
             // Apply Filters
             if (queryParams.StartDate.HasValue)

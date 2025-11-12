@@ -5,11 +5,11 @@ namespace Budget_Tracker_WebAPI.Repositories
 {
     public interface ITransactionRepository
     {
-        public  Task<TransactionDTO> AddTransaction(TransactionMaster transaction);
-        public  Task<TransactionCategoryMasterDTO> AddTransactionCategory(TransactionCategoryMaster transaction);
-        public  Task<TransactionTypeMasterDTO> AddTransactionType(TransactionTypeMaster transaction);
+        public  TransactionDTO AddTransaction(TransactionMaster transaction);
+        public  TransactionCategoryMasterDTO AddTransactionCategory(TransactionCategoryMaster transaction);
+        public  TransactionTypeMasterDTO AddTransactionType(TransactionTypeMaster transaction);
 
-        public  Task<TransactionPaymentModeDTO> AddPaymentMode(TransactionPaymentMode model);
+        public  TransactionPaymentModeDTO AddPaymentMode(TransactionPaymentMode model);
         public TransactionDTO EditTransaction(TransactionMaster transaction);
 
         public void Delete(TransactionMaster transaction);

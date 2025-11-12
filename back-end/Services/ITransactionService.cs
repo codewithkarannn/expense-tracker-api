@@ -6,10 +6,10 @@ namespace Budget_Tracker_WebAPI.Services
 {
     public interface  ITransactionService 
     {
-        public  Task<TransactionDTO> AddTransaction(TransactionDTO transactionDTO);
+        public  TransactionDTO AddTransaction(TransactionDTO transactionDTO);
         public  Task<TransactionTypeMasterDTO> AddTransactionType(AddTransactionTypeMasterDTO transactionDTO);
         public Task<TransactionCategoryMasterDTO> AddTransactionCategory(AddTransactionCategoryMasterDTO modelDTO);
-        public Task<TransactionDTO> EditTransaction(EditTransactionDTO transactionDTO);
+        public TransactionDTO EditTransaction(EditTransactionDTO transactionDTO);
         public  Task<List<TransactionDTO>> GetAllTransactionsByUserID(Guid userID , int page , int pageSize );
         public Task<List<TransactionDTO>> GetRecentTransactionsByUserID(Guid userID);
         public void DeleteTransaction(Guid transactionMasterID);

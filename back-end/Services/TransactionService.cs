@@ -15,7 +15,7 @@ namespace Budget_Tracker_WebAPI.Services
             _transactionRepository = transactionRepository;
         }
 
-        public async Task<TransactionDTO> AddTransaction(TransactionDTO transactionDTO)
+        public TransactionDTO AddTransaction(TransactionDTO transactionDTO)
         {
             try
             {
@@ -34,7 +34,7 @@ namespace Budget_Tracker_WebAPI.Services
                     UserId = transactionDTO.UserId
                 };
 
-                return await _transactionRepository.AddTransaction(newTransaction);
+                return  _transactionRepository.AddTransaction(newTransaction);
             }
             catch (Exception ex)
             {
@@ -44,10 +44,10 @@ namespace Budget_Tracker_WebAPI.Services
         }
 
         public async Task<TransactionTypeMasterDTO> AddTransactionType(AddTransactionTypeMasterDTO modelDTO)
-        {
+        {   
             try
-            {
-                var IsPresent =await  _transactionRepository.IsTransactionTypePresent(modelDTO.UserMasterId, modelDTO?.TransactionTypename);
+            {       
+                var IsPresent = await  _transactionRepository.IsTransactionTypePresent(modelDTO.UserMasterId, modelDTO?.TransactionTypename);
 
                 if(IsPresent != true)
                 {
@@ -60,7 +60,7 @@ namespace Budget_Tracker_WebAPI.Services
                         UserMasterId = modelDTO.UserMasterId
                     };
 
-                    return await _transactionRepository.AddTransactionType(newModel);
+                    return  _transactionRepository.AddTransactionType(newModel);
                 }
                 throw new Exception("Transaction type already present");
             }
@@ -88,7 +88,7 @@ namespace Budget_Tracker_WebAPI.Services
                         UserMasterId = modelDTO.UserMasterId
                     };
 
-                    return await _transactionRepository.AddTransactionCategory(newModel);
+                    return  _transactionRepository.AddTransactionCategory(newModel);
                 }
                 throw new Exception("Transaction category already present");
             }
@@ -119,7 +119,7 @@ namespace Budget_Tracker_WebAPI.Services
                         UserMasterId = modelDTO.UserMasterId
                     };
 
-                    return await _transactionRepository.AddPaymentMode(newModel);
+                    return  _transactionRepository.AddPaymentMode(newModel);
                 }
                 throw new Exception("Transaction payment mode already present");
             }
@@ -130,13 +130,13 @@ namespace Budget_Tracker_WebAPI.Services
             }
         }
 
-        public async Task<TransactionDTO> EditTransaction(EditTransactionDTO transactionDTO)
+        public TransactionDTO EditTransaction(EditTransactionDTO transactionDTO)
         {
             try
             {
                 if(transactionDTO.TransactionMasterId  != Guid.Empty)
                 {
-                    var existingTransaction =  _transactionRepository.GetTransactionByTransactionMasterID(transactionDTO.TransactionMasterId);
+                    var existingTransaction =   _transactionRepository.GetTransactionByTransactionMasterID(transactionDTO.TransactionMasterId);
 
                     if (existingTransaction != null)
                     {

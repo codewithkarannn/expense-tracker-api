@@ -41,8 +41,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 builder.Services.AddDbContext<Db15765Context>(options =>
+{
     options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),
-    ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection"))));
+            ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection")))
+        .EnableSensitiveDataLogging(); // <--- show parameter values in logs
+});
 
 // Add services to the container.
 builder.Services.AddControllers();

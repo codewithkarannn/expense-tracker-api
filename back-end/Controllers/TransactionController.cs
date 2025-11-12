@@ -29,7 +29,7 @@ namespace Budget_Tracker_WebAPI.Controllers
                     return BadRequest(responses);
                 }
 
-                var addedTransaction = await _transactionService.AddTransaction(transactionDTO);
+                var addedTransaction =  _transactionService.AddTransaction(transactionDTO);
 
                 var response = new ResponseModel<TransactionDTO>(addedTransaction, "Transaction added successfully", 201);
                 return Ok( response);
@@ -119,7 +119,7 @@ namespace Budget_Tracker_WebAPI.Controllers
             try
             {
 
-                var updatedTransaction =  await _transactionService.EditTransaction(transactionDTO);
+                var updatedTransaction =   _transactionService.EditTransaction(transactionDTO);
 
                 var response = new ResponseModel<TransactionDTO>(updatedTransaction, "Transaction updated successfully", 200);
                 return Ok(response);
