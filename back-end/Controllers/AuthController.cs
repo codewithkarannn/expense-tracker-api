@@ -70,7 +70,7 @@ namespace Budget_Tracker_WebAPI.Controllers
             {
 
                 var token = await authService.LoginUserAsync(dto);
-                var response = new ResponseModel<object>(token, "User registered successfully", 201);
+                var response = new ResponseModel<object>(token, "User login successfully", 201);
                 return Ok(response);
 
             }
