@@ -4,8 +4,7 @@
     {
         public Guid UserId { get; set; }
         public string? CurrentBalance { get; set; }
-        public string? PreviousBalance { get; set; }
-        public string? BalancePercentageChange { get; set; }
+      
         public string? CurrentExpense { get; set; }
         public string? TodayIncome { get; set; }
         public string? WeekIncome { get; set; }
@@ -20,11 +19,8 @@
         public string? DayExpenseChange { get; set; }
         public string? WeekExpenseChange { get; set; }
         public string? MonthExpenseChange { get; set; }
-        public string? PreviousExpense { get; set; }
-        public string? ExpensePercentageChange { get; set; }
+        
         public string? CurrentIncome { get; set; }
-        public string? PreviousIncome { get; set; }
-        public string? IncomePercentageChange { get; set; }
 
     }
 }

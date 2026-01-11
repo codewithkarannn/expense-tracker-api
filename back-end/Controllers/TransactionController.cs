@@ -19,7 +19,7 @@ namespace Budget_Tracker_WebAPI.Controllers
         }
 
         [HttpPost("addtransaction")]
-        public async Task<IActionResult> AddTransaction(TransactionDTO transactionDTO)
+        public async Task<IActionResult> AddTransaction(CreateTransactionDto transactionDTO)
         {
             try
             {
@@ -31,7 +31,7 @@ namespace Budget_Tracker_WebAPI.Controllers
 
                 var addedTransaction =  _transactionService.AddTransaction(transactionDTO);
 
-                var response = new ResponseModel<TransactionDTO>(addedTransaction, "Transaction added successfully", 201);
+                var response = new ResponseModel<TransactionDto>(addedTransaction, "Transaction added successfully", 201);
                 return Ok( response);
             }
             catch (Exception ex)
@@ -121,7 +121,7 @@ namespace Budget_Tracker_WebAPI.Controllers
 
                 var updatedTransaction =   _transactionService.EditTransaction(transactionDTO);
 
-                var response = new ResponseModel<TransactionDTO>(updatedTransaction, "Transaction updated successfully", 200);
+                var response = new ResponseModel<TransactionDto>(updatedTransaction, "Transaction updated successfully", 200);
                 return Ok(response);
             }
             catch (Exception ex)
@@ -144,7 +144,7 @@ namespace Budget_Tracker_WebAPI.Controllers
                     return NotFound(err_response);
                 }
 
-                var response = new ResponseModel<List<TransactionDTO>>(transactions, "Transactions retrieved successfully", 200);
+                var response = new ResponseModel<List<TransactionDto>>(transactions, "Transactions retrieved successfully", 200);
                 return Ok(response);
             }
             catch (Exception ex)
@@ -167,11 +167,11 @@ namespace Budget_Tracker_WebAPI.Controllers
 
                 if (pagedTransactions == null || !pagedTransactions.Any())
                 {
-                    var emptyResponse = new PaginatedResponseModel<TransactionDTO>(new List<TransactionDTO>(), queryParams.Page, queryParams.PageSize, 0);
+                    var emptyResponse = new PaginatedResponseModel<TransactionDto>(new List<TransactionDto>(), queryParams.Page, queryParams.PageSize, 0);
                     return Ok(emptyResponse);
                 }
 
-                var response = new PaginatedResponseModel<TransactionDTO>(pagedTransactions, queryParams.Page, queryParams.PageSize, totalItems);
+                var response = new PaginatedResponseModel<TransactionDto>(pagedTransactions, queryParams.Page, queryParams.PageSize, totalItems);
                 return Ok(response);
             }
             catch (Exception ex)
@@ -195,7 +195,7 @@ namespace Budget_Tracker_WebAPI.Controllers
                     return NotFound(err_response);
                 }
 
-                var response = new ResponseModel<List<TransactionDTO>>(transactions, "Transactions retrieved successfully", 200);
+                var response = new ResponseModel<List<TransactionDto>>(transactions, "Transactions retrieved successfully", 200);
                 return Ok(response);
             }
             catch (Exception ex)
@@ -287,7 +287,7 @@ namespace Budget_Tracker_WebAPI.Controllers
                     return NotFound(err_response);
                 }
 
-                var response = new ResponseModel<TransactionDTO>(transaction, "Transaction retrieved successfully", 200);
+                var response = new ResponseModel<TransactionDto>(transaction, "Transaction retrieved successfully", 200);
                 return Ok(response);
             }
             catch (Exception ex)
@@ -392,8 +392,8 @@ namespace Budget_Tracker_WebAPI.Controllers
         }
 
 
-        [HttpGet("transactionscount/{userID}/{numberofmonths}")]
-        public async Task<IActionResult> GetCountOfTransactions(Guid userID , int numberOfMonths)
+        [HttpGet("transactionscount/{userID}")]
+        public async Task<IActionResult> GetCountOfTransactions(Guid userID , [FromQuery] int numberOfMonths)
         {
             try
             {

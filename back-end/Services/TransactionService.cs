@@ -15,7 +15,7 @@ namespace Budget_Tracker_WebAPI.Services
             _transactionRepository = transactionRepository;
         }
 
-        public TransactionDTO AddTransaction(TransactionDTO transactionDTO)
+        public TransactionDto AddTransaction(CreateTransactionDto transactionDTO)
         {
             try
             {
@@ -130,7 +130,7 @@ namespace Budget_Tracker_WebAPI.Services
             }
         }
 
-        public TransactionDTO EditTransaction(EditTransactionDTO transactionDTO)
+        public TransactionDto EditTransaction(EditTransactionDTO transactionDTO)
         {
             try
             {
@@ -181,7 +181,7 @@ namespace Budget_Tracker_WebAPI.Services
             }
         }
 
-        public async Task<List<TransactionDTO>> GetAllTransactionsByUserID(Guid userID, int page, int pageSize)
+        public async Task<List<TransactionDto>> GetAllTransactionsByUserID(Guid userID, int page, int pageSize)
         {
             try
             {
@@ -204,7 +204,7 @@ namespace Budget_Tracker_WebAPI.Services
         }
 
 
-        public async Task<List<TransactionDTO>> GetRecentTransactionsByUserID(Guid userID)
+        public async Task<List<TransactionDto>> GetRecentTransactionsByUserID(Guid userID)
         {
             try
             {
@@ -371,7 +371,7 @@ namespace Budget_Tracker_WebAPI.Services
         }
 
 
-        public TransactionDTO GetTransactionByTransactionID(Guid transactionMasterID)
+        public TransactionDto GetTransactionByTransactionID(Guid transactionMasterID)
         {
             try
             {
@@ -533,7 +533,7 @@ namespace Budget_Tracker_WebAPI.Services
             }
         }
 
-        public async Task<(List<TransactionDTO> Transactions, int TotalItems)> GetPaginatedTransactionsByUserID(Guid userId, TransactionQueryParameters queryParams)
+        public async Task<(List<TransactionDto> Transactions, int TotalItems)> GetPaginatedTransactionsByUserID(Guid userId, TransactionQueryParameters queryParams)
         {
             try
             {

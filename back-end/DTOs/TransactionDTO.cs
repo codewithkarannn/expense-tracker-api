@@ -1,8 +1,9 @@
-﻿using Budget_Tracker_WebAPI.Models;
+﻿using System.ComponentModel.DataAnnotations;
+using Budget_Tracker_WebAPI.Models;
 
 namespace Budget_Tracker_WebAPI.DTOs
 {
-    public class TransactionDTO
+    public class TransactionDto
     {
         public Guid? TransactionMasterId { get; set; } = Guid.Empty;
 
@@ -34,7 +35,37 @@ namespace Budget_Tracker_WebAPI.DTOs
 
     }
 
+    
+public class CreateTransactionDto
+{
+    [Required]
+    public Guid UserId { get; set; }
 
+    [Required]
+    public int TransactionTypeMasterId { get; set; }
+
+    [Required]
+    public int TransactionCategoryMasterId { get; set; }
+
+    [Required]
+    public int TransactionPaymentModeId { get; set; }
+
+    [Required]
+    [MaxLength(500)]
+    public string TransactionDescription { get; set; } = string.Empty;
+
+    [Required]
+    [Range(0.01, double.MaxValue)]
+    public double TransactionAmount { get; set; }
+
+    [Required]
+    public DateTime TransactionDate { get; set; }
+
+    [MaxLength(1000)]
+    public string? TransactionNote { get; set; }
+}
+ 
+    
     public partial class TransactionCategoryMasterDTO
     {
         public int TransactionCategoryMasterId { get; set; }
@@ -55,6 +86,7 @@ namespace Budget_Tracker_WebAPI.DTOs
         public Guid UserMasterId { get; set; }
 
     }
+    
     public partial class TransactionTypeMasterDTO
     {
         public int TransactionTypeMasterId { get; set; }

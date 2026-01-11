@@ -15,7 +15,7 @@ namespace Budget_Tracker_WebAPI.Repositories
 
         }
 
-        public TransactionDTO AddTransaction(TransactionMaster transaction)
+        public TransactionDto AddTransaction(TransactionMaster transaction)
         {
 
             try
@@ -25,7 +25,7 @@ namespace Budget_Tracker_WebAPI.Repositories
                 var newEntity =  db.TransactionMasters.Add(transaction);
                 db.SaveChanges();
 
-                return new TransactionDTO
+                return new TransactionDto
                 {
                     TransactionMasterId = newEntity.Entity.TransactionMasterId,
                     TransactionAmount = newEntity.Entity.TransactionAmount,
@@ -186,7 +186,7 @@ namespace Budget_Tracker_WebAPI.Repositories
         }
 
 
-        public TransactionDTO EditTransaction(TransactionMaster transaction)
+        public TransactionDto EditTransaction(TransactionMaster transaction)
         {
 
             try
@@ -195,7 +195,7 @@ namespace Budget_Tracker_WebAPI.Repositories
                 var entity = db.TransactionMasters.Update(transaction);
                 db.SaveChanges();
 
-                return new TransactionDTO
+                return new TransactionDto
                 {
                     TransactionMasterId = entity.Entity.TransactionMasterId,
                     TransactionAmount = entity.Entity.TransactionAmount,
@@ -239,7 +239,7 @@ namespace Budget_Tracker_WebAPI.Repositories
             }
         }
 
-        public async Task<List<TransactionDTO>> GetAllTransactionByUserID(Guid userId, int page, int pageSize)
+        public async Task<List<TransactionDto>> GetAllTransactionByUserID(Guid userId, int page, int pageSize)
         {
             try
             {
@@ -251,7 +251,7 @@ namespace Budget_Tracker_WebAPI.Repositories
                     .Include(i => i.TransactionTypeMaster)
                     .Include(i => i.TransactionPaymentmode)
                     .Where(i => i.UserId == userId && i.IsActive == 1)
-                    .Select(t => new TransactionDTO
+                    .Select(t => new TransactionDto
                     {
 
                         TransactionTypeMasterId = t.TransactionTypeMasterId,
@@ -281,7 +281,7 @@ namespace Budget_Tracker_WebAPI.Repositories
                 throw new Exception("\"There was an error fetching  your transactions. Please try again.\"", ex); ;
             }
         }
-        public async Task<List<TransactionDTO>> GetRecentTransactionsByUserID(Guid userId)
+        public async Task<List<TransactionDto>> GetRecentTransactionsByUserID(Guid userId)
         {
             try
             {
@@ -290,7 +290,7 @@ namespace Budget_Tracker_WebAPI.Repositories
                     .Include(i => i.TransactionTypeMaster)
                     .Include(i => i.TransactionPaymentmode)
                     .Where(i => i.UserId == userId && i.IsActive == 1)
-                    .Select(t => new TransactionDTO
+                    .Select(t => new TransactionDto
                     {
 
                         TransactionTypeMasterId = t.TransactionTypeMasterId,
@@ -319,7 +319,7 @@ namespace Budget_Tracker_WebAPI.Repositories
                 throw new Exception("\"There was an error fetching  your transactions. Please try again.\"", ex); ;
             }
         }
-        public TransactionDTO GetTransactionByTransactionMasterID(Guid transactionMasterID)
+        public TransactionDto GetTransactionByTransactionMasterID(Guid transactionMasterID)
         {
             try
             {
@@ -327,7 +327,7 @@ namespace Budget_Tracker_WebAPI.Repositories
                     .Include(i => i.TransactionCategoryMaster)
                     .Include(i => i.TransactionTypeMaster)
                     .Where(i => i.TransactionMasterId == transactionMasterID && i.IsActive == 1)
-                    .Select(t => new TransactionDTO
+                    .Select(t => new TransactionDto
                     {
 
                         TransactionTypeMasterId = t.TransactionTypeMasterId,
@@ -752,7 +752,7 @@ namespace Budget_Tracker_WebAPI.Repositories
             }
         }
 
-        public async Task<(List<TransactionDTO> Transactions, int TotalItems)> GetPaginatedTransactionsByUserID(Guid userId, TransactionQueryParameters queryParams)
+        public async Task<(List<TransactionDto> Transactions, int TotalItems)> GetPaginatedTransactionsByUserID(Guid userId, TransactionQueryParameters queryParams)
         {
             // Start with a base query
             var query = db.TransactionMasters
@@ -795,7 +795,7 @@ namespace Budget_Tracker_WebAPI.Repositories
             var transactions = await query
                 .Skip((queryParams.Page - 1) * queryParams.PageSize)
                 .Take(queryParams.PageSize)
-                .Select(t => new TransactionDTO
+                .Select(t => new TransactionDto
                 {
 
                     TransactionMasterId = t.TransactionMasterId,

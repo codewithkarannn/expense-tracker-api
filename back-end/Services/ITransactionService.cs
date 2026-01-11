@@ -6,16 +6,16 @@ namespace Budget_Tracker_WebAPI.Services
 {
     public interface  ITransactionService 
     {
-        public  TransactionDTO AddTransaction(TransactionDTO transactionDTO);
+        public  TransactionDto AddTransaction(CreateTransactionDto transactionDTO);
         public  Task<TransactionTypeMasterDTO> AddTransactionType(AddTransactionTypeMasterDTO transactionDTO);
         public Task<TransactionCategoryMasterDTO> AddTransactionCategory(AddTransactionCategoryMasterDTO modelDTO);
-        public TransactionDTO EditTransaction(EditTransactionDTO transactionDTO);
-        public  Task<List<TransactionDTO>> GetAllTransactionsByUserID(Guid userID , int page , int pageSize );
-        public Task<List<TransactionDTO>> GetRecentTransactionsByUserID(Guid userID);
+        public TransactionDto EditTransaction(EditTransactionDTO transactionDTO);
+        public  Task<List<TransactionDto>> GetAllTransactionsByUserID(Guid userID , int page , int pageSize );
+        public Task<List<TransactionDto>> GetRecentTransactionsByUserID(Guid userID);
         public void DeleteTransaction(Guid transactionMasterID);
         public  void DeleteTransactionType(int transactionTypeMasterID);
         public void DeleteTransactionCategory(int transactionCategoryMasterID);
-        public TransactionDTO GetTransactionByTransactionID(Guid transactionMasterID);
+        public TransactionDto GetTransactionByTransactionID(Guid transactionMasterID);
         public Task<List<TransactionCategoryMasterDTO>> GetAllTransactionCategories(Guid userMasterID);
 
         public Task<List<TransactionTypeMasterDTO>> GetAllTransactionTypes(Guid? userMasterID);
@@ -26,6 +26,6 @@ namespace Budget_Tracker_WebAPI.Services
         public void DeleteTransactionPayementMode(int paymentModeMasterId);
         public Task<TransactionPaymentModeDTO> AddTransactionPayementMode(TransactionPaymentModeDTO modelDTO);
 
-        Task<(List<TransactionDTO> Transactions, int TotalItems)> GetPaginatedTransactionsByUserID(Guid userId, TransactionQueryParameters queryParams);
+        Task<(List<TransactionDto> Transactions, int TotalItems)> GetPaginatedTransactionsByUserID(Guid userId, TransactionQueryParameters queryParams);
     }
 }
