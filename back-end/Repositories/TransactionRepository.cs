@@ -544,14 +544,15 @@ namespace Budget_Tracker_WebAPI.Repositories
         {
             try
             {
-                var transactionCategories = db.TransactionCategoryMasters.Where(i => i.IsActive == 1 && (i.UserMasterId == userMasterID || i.UserMasterId == null))
+                var transactionCategories = await db.TransactionCategoryMasters
+                    .Where(i => i.IsActive == 1 || userMasterID ==  userMasterID)
                     .Select(i => new TransactionCategoryMasterDTO
                     {
                         TransactionCategoryMasterId = i.TransactionCategoryMasterId,
                         TransactionCategoryName = i.TransactionCategoryName,
-                        IsCustom = (i.UserMasterId != null) ? true : false,
+                        IsCustom = i.UserMasterId != null
                     })
-                    .ToList();
+                    .ToListAsync();
 
                 return transactionCategories;
             }
