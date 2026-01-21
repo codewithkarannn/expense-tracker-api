@@ -33,6 +33,9 @@ public partial class UserMaster
     public virtual ICollection<TransactionPaymentMode> TransactionPaymentModes { get; set; } = new List<TransactionPaymentMode>();
 
     public virtual ICollection<TransactionTypeMaster> TransactionTypeMasters { get; set; } = new List<TransactionTypeMaster>();
+    
+    public virtual ICollection<BudgetMaster> BudgetMasters { get; set; } = new List<BudgetMaster>();
+
 
     public virtual UserRoleMaster? UserRole { get; set; }
     

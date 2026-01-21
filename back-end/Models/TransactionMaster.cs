@@ -34,6 +34,8 @@ public partial class TransactionMaster
     public virtual TransactionPaymentMode? TransactionPaymentmode { get; set; }
 
     public virtual TransactionTypeMaster TransactionTypeMaster { get; set; } = null!;
+    
+    
 
     public virtual UserMaster User { get; set; } = null!;
 }

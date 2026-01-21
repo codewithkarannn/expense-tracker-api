@@ -344,7 +344,7 @@ namespace Budget_Tracker_WebAPI.Controllers
         }
 
 
-        [HttpGet("transactioncategories")]
+        [HttpGet("transactioncategories/{userMasterID}/{transactionTypeMasterId}")]
         public async Task<IActionResult> GetAllTransactionCategories(Guid userMasterID ,  int transactionTypeMasterId)
         {
             try

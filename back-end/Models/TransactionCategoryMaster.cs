@@ -16,6 +16,9 @@ public partial class TransactionCategoryMaster
     public Guid? UserMasterId { get; set; }
 
     public virtual ICollection<TransactionMaster> TransactionMasters { get; set; } = new List<TransactionMaster>();
+    public virtual ICollection<BudgetMaster> BudgetMasters { get; set; } = new List<BudgetMaster>();
+
+
 
     public virtual UserMaster? UserMaster { get; set; }
     

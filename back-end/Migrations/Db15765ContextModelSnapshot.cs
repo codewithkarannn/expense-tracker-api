@@ -24,6 +24,48 @@ namespace Budget_Tracker_WebAPI.Migrations
             MySqlModelBuilderExtensions.HasCharSet(modelBuilder, "utf8mb4");
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
+            modelBuilder.Entity("Budget_Tracker_WebAPI.Models.BudgetMaster", b =>
+                {
+                    b.Property<Guid>("BudgetMasterId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<double>("Amount")
+                        .HasColumnType("double");
+
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("DeletedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<DateTime>("ModifiedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int?>("TransactionCategoryMasterId")
+                        .HasColumnType("int(11)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid?>("UserMasterId")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("BudgetMasterId");
+
+                    b.HasIndex("TransactionCategoryMasterId");
+
+                    b.HasIndex("UserMasterId");
+
+                    b.ToTable("BudgetMaster");
+                });
+
             modelBuilder.Entity("Budget_Tracker_WebAPI.Models.CurrencyMaster", b =>
                 {
                     b.Property<int>("CurrencyMasterId")
@@ -248,10 +290,6 @@ namespace Budget_Tracker_WebAPI.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)");
 
-                    b.Property<string>("UserMastercol")
-                        .HasMaxLength(45)
-                        .HasColumnType("varchar(45)");
-
                     b.Property<string>("UserPassword")
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)");
@@ -289,6 +327,21 @@ namespace Budget_Tracker_WebAPI.Migrations
                         .HasName("PRIMARY");
 
                     b.ToTable("user_role_master", (string)null);
+                });
+
+            modelBuilder.Entity("Budget_Tracker_WebAPI.Models.BudgetMaster", b =>
+                {
+                    b.HasOne("Budget_Tracker_WebAPI.Models.TransactionCategoryMaster", "TransactionCategoryMaster")
+                        .WithMany("BudgetMasters")
+                        .HasForeignKey("TransactionCategoryMasterId");
+
+                    b.HasOne("Budget_Tracker_WebAPI.Models.UserMaster", "UserMaster")
+                        .WithMany("BudgetMasters")
+                        .HasForeignKey("UserMasterId");
+
+                    b.Navigation("TransactionCategoryMaster");
+
+                    b.Navigation("UserMaster");
                 });
 
             modelBuilder.Entity("Budget_Tracker_WebAPI.Models.TransactionCategoryMaster", b =>
@@ -384,6 +437,8 @@ namespace Budget_Tracker_WebAPI.Migrations
 
             modelBuilder.Entity("Budget_Tracker_WebAPI.Models.TransactionCategoryMaster", b =>
                 {
+                    b.Navigation("BudgetMasters");
+
                     b.Navigation("TransactionMasters");
                 });
 
@@ -401,6 +456,8 @@ namespace Budget_Tracker_WebAPI.Migrations
 
             modelBuilder.Entity("Budget_Tracker_WebAPI.Models.UserMaster", b =>
                 {
+                    b.Navigation("BudgetMasters");
+
                     b.Navigation("TransactionCategoryMasters");
 
                     b.Navigation("TransactionMasters");

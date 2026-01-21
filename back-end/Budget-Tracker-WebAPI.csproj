@@ -34,4 +34,10 @@
     <Folder Include="logs\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="TestProject\obj\project.assets.json" />
+    <_ContentIncludedByDefault Remove="TestProject\obj\project.packagespec.json" />
+    <_ContentIncludedByDefault Remove="TestProject\obj\TestProject.csproj.nuget.dgspec.json" />
+  </ItemGroup>
+
 </Project>

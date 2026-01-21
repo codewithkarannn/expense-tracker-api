@@ -759,6 +759,7 @@ namespace Budget_Tracker_WebAPI.Repositories
                         TransactionCategoryName = i.TransactionCategoryName,
                         IsCustom = i.UserMasterId != null
                     })
+                    .OrderBy(i=>i.TransactionCategoryName)
                     .ToListAsync();
 
                 return transactionCategories;
