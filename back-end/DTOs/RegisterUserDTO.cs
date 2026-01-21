@@ -14,6 +14,9 @@ namespace Budget_Tracker_WebAPI.DTOs
         public string Password { get; set; }
         public string LastName { get; set; }
         public string FirstName { get; set; }
+        
+        [Required(ErrorMessage = "Currency id is required.")]
+        public int CurrencyMasterId { get; set; }
       
 
     }

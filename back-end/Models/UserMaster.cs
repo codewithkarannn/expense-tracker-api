@@ -12,12 +12,13 @@ public partial class UserMaster
     public string? LastName { get; set; }
 
     public int? UserRoleId { get; set; }
+    
+    public int? CurrencyMasterId { get; set; }
 
     public string? UserEmail { get; set; }
 
     public string? UserPassword { get; set; }
-
-    public string? UserMastercol { get; set; }
+    
 
     public sbyte? IsActive { get; set; }
 
@@ -34,4 +35,6 @@ public partial class UserMaster
     public virtual ICollection<TransactionTypeMaster> TransactionTypeMasters { get; set; } = new List<TransactionTypeMaster>();
 
     public virtual UserRoleMaster? UserRole { get; set; }
+    
+    public virtual CurrencyMaster? CurrencyMaster { get; set; }
 }

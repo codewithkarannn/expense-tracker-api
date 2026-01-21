@@ -131,20 +131,66 @@ namespace Budget_Tracker_WebAPI.Controllers
             }
         }
 
-        [HttpGet("transactions/{userID}")]
+        [HttpGet("usertransactions/{userID}/{page}/{pageSize}")]
         public async Task<IActionResult> GetAllTransactionsByUserID(Guid userID,  int page = 1 , int pageSize =  10)
         {
             try
             {
                 var transactions = await _transactionService.GetAllTransactionsByUserID(userID , page , pageSize);
 
-                if (transactions == null || transactions.Count == 0)
+                if (transactions == null || transactions.TransactionList.Count == 0)
                 {
                     var err_response = new ResponseModel<object>("No transactions found", StatusCodes.Status404NotFound);
                     return NotFound(err_response);
                 }
 
-                var response = new ResponseModel<List<TransactionDto>>(transactions, "Transactions retrieved successfully", 200);
+                var response = new ResponseModel<PaginatedTransactionDto>(transactions, "Transactions retrieved successfully", 200);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                var response = new ResponseModel<object>(ex.Message, 400);
+                return StatusCode(response.StatusCode, response);
+            }
+        }
+        
+        [HttpGet("expensepiechartdata/{userId}/{numberOfMonths}")]
+        public async Task<IActionResult> GetExpensePieChartData(Guid userId, int  numberOfMonths = 1)
+        {
+            try
+            {
+                var transactions = await _transactionService.GetExpensePieChartData(userId , numberOfMonths );
+
+                if (transactions == null || transactions.Count == 0)
+                {
+                    var errResponse = new ResponseModel<object>("No transactions found", StatusCodes.Status404NotFound);
+                    return NotFound(errResponse);
+                }
+
+                var response = new ResponseModel<List<ExpensePieChartDTO>>(transactions, "Transactions retrieved successfully", 200);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                var response = new ResponseModel<object>(ex.Message, 400);
+                return StatusCode(response.StatusCode, response);
+            }
+        }
+        
+        [HttpGet("monthlyexpenselinechartdata/{userId}/{numberOfMonths}")]
+        public async Task<IActionResult> GetMonthlyExpenseLineChartData(Guid userId, int  numberOfMonths = 1)
+        {
+            try
+            {
+                var transactions = await _transactionService.GetMonthlyExpenseLineChartData(userId , numberOfMonths );
+
+                if (transactions == null )
+                {
+                    var errResponse = new ResponseModel<object>("No transactions found", StatusCodes.Status404NotFound);
+                    return NotFound(errResponse);
+                }
+
+                var response = new ResponseModel<MonthlyExpenseOverviewDTO>(transactions, "Transactions retrieved successfully", 200);
                 return Ok(response);
             }
             catch (Exception ex)
@@ -299,11 +345,11 @@ namespace Budget_Tracker_WebAPI.Controllers
 
 
         [HttpGet("transactioncategories")]
-        public async Task<IActionResult> GetAllTransactionCategories(Guid userMasterID)
+        public async Task<IActionResult> GetAllTransactionCategories(Guid userMasterID ,  int transactionTypeMasterId)
         {
             try
             {
-                var transactions = await _transactionService.GetAllTransactionCategories(userMasterID);
+                var transactions = await _transactionService.GetAllTransactionCategories(userMasterID , transactionTypeMasterId);
 
                 if (transactions == null || transactions.Count == 0)
                 {
@@ -390,6 +436,30 @@ namespace Budget_Tracker_WebAPI.Controllers
                 return StatusCode(response.StatusCode, response);
             }
         }
+        
+        
+        [HttpGet("transactionsummary/{userId}/{numberOfMonths?}")]
+        public async Task<IActionResult> GetTransactionSummary(Guid userId , int? numberOfMonths = null)
+        {
+            try
+            {
+                var transactionsummary = await _transactionService.GetTransactionSummary(userId , numberOfMonths);
+
+                if (transactionsummary == null )
+                {
+                    var err_response = new ResponseModel<object>("No transaction category found", StatusCodes.Status404NotFound);
+                    return NotFound(err_response);
+                }
+
+                var response = new ResponseModel<TransactionSummaryDTO>(transactionsummary, "Transactions summary   retrieved successfully", 200);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                var response = new ResponseModel<object>(ex.Message, 400);
+                return StatusCode(response.StatusCode, response);
+            }
+        }
 
 
         [HttpGet("transactionscount/{userID}")]
@@ -399,14 +469,38 @@ namespace Budget_Tracker_WebAPI.Controllers
             {
                 var transactionCount = await _transactionService.GetCountOfTransactions(userID , numberOfMonths);
 
-                if (transactionCount == null)
+                if (transactionCount == 0)
                 {
-                    var err_response = new ResponseModel<object>("No transactions found", StatusCodes.Status404NotFound);
-                    return NotFound(err_response);
+                    var errResponse = new ResponseModel<object>("No transactions found", StatusCodes.Status404NotFound);
+                    return NotFound(errResponse);
                 }
 
                 var response = new ResponseModel<int>(transactionCount, "Transactions Count retrieved successfully", 200);
                 return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                var response = new ResponseModel<object>(ex.Message, 400);
+                return StatusCode(response.StatusCode, response);
+            }
+        }
+        
+        [HttpGet("currencies")]
+        public async Task<IActionResult> GetAllCurrencies()
+        {
+            try
+            {
+                var currencies = await _transactionService.GetAllCurrencies();
+
+                if (currencies == null)
+                {
+                    var errResponse = new ResponseModel<object>("No transactions found", StatusCodes.Status404NotFound);
+                    return NotFound(errResponse);
+                }
+              
+                var response = new ResponseModel<List<CurrencyMasterDTO>>(currencies, "Transactions Count retrieved successfully", 200);
+                return Ok(response);
+                
             }
             catch (Exception ex)
             {

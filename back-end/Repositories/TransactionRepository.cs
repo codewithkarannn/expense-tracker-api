@@ -1,4 +1,5 @@
-﻿using Budget_Tracker_WebAPI.DTOs;
+﻿using System.Globalization;
+using Budget_Tracker_WebAPI.DTOs;
 using Budget_Tracker_WebAPI.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,9 +16,205 @@ namespace Budget_Tracker_WebAPI.Repositories
 
         }
 
+        
+         public async Task<List<CurrencyMasterDTO>?> GetAllCurrencies()
+        {
+            try
+            {
+                return await db.CurrencyMasters.Select( i=>  new CurrencyMasterDTO
+                {
+                    CurrencyMasterId = i.CurrencyMasterId,
+                    CurrencyCode = i.CurrencyCode,
+                    CurrencyName = i.CurrencyName,
+                    CurrencySymbol = i.CurrencySymbol
+                }).OrderBy(i=>i.CurrencyName).ToListAsync();
+                
+            }
+            catch (Exception e)
+            {
+                throw new Exception("\"There was an error fetching chart data . Please try again.\"", e);
+            }
+        }
+       
+        public async Task<MonthlyExpenseOverviewDTO?> GetMonthlyExpenseLineChartData(Guid userid , int numberOfMonths)
+        {
+            try
+            {
+                
+                
+                DateTime  endDate = DateTime.UtcNow;
+                DateTime startDate = endDate.AddMonths(-numberOfMonths);
+                decimal percentageChange = 0;
+                string sign = "";
+                var now = DateTime.UtcNow;
+
+                var startOfThisMonth = new DateTime(now.Year, now.Month, 1);
+                var startOfLastMonth = startOfThisMonth.AddMonths(-1);
+                var endOfLastMonth = startOfThisMonth.AddDays(-1);
+
+                var response = await db.TransactionMasters
+                    .AsNoTracking()
+                    .Where(i => i.UserId == userid && i.IsActive == 1 && i.TransactionTypeMasterId == 2 &&  i.TransactionDate >= startDate && i.TransactionDate <= endDate)
+                    .GroupBy(i => new { i.TransactionDate.Year, i.TransactionDate.Month })
+                    .Select(g => new MonthlyExpenseDTO
+                    {
+                        Month = CultureInfo.CurrentCulture
+                            .DateTimeFormat
+                            .GetAbbreviatedMonthName(g.Key.Month),
+                        MonthNumber = g.Key.Month,
+                        Year = g.Key.Year.ToString().Substring(2) ,
+                        Amount = (decimal)g.Sum(x => x.TransactionAmount)
+                    })
+                    .ToListAsync();
+
+ 
+                
+                var thisMonthTotal = await db.TransactionMasters
+                    .Where(i => i.UserId == userid &&
+                                i.IsActive == 1 &&
+                                i.TransactionTypeMasterId == 2 &&
+                                i.TransactionDate >= startOfThisMonth &&
+                                i.TransactionDate <= now)
+                    .SumAsync(i => (decimal?)i.TransactionAmount) ?? 0;
+
+                var lastMonthTotal = await db.TransactionMasters
+                    .Where(i => i.UserId == userid &&
+                                i.IsActive == 1 &&
+                                i.TransactionTypeMasterId == 2 &&
+                                i.TransactionDate >= startOfLastMonth &&
+                                i.TransactionDate <= endOfLastMonth)
+                    .SumAsync(i => (decimal?)i.TransactionAmount) ?? 0;
+                
+                
+                if (lastMonthTotal > 0)
+                {
+                    percentageChange = ((thisMonthTotal - lastMonthTotal) / lastMonthTotal) * 100;
+                    sign = percentageChange >= 0 ? "+" : "-";
+                }
+                else
+                {
+                    // If last month was zero, treat increase as 100%
+                    percentageChange = 100;
+                    sign = "+";
+                }
+
+                var finalReponse = new MonthlyExpenseOverviewDTO
+                {
+                    PercentageLastMonthlyExpense =  percentageChange,
+                    TotalMonthlyExpense =  thisMonthTotal,
+                    MonthlyExpenses = response,
+                    Sign =  sign,
+                };
+                
+                return finalReponse;
+            }
+            catch (Exception e)
+            {
+                throw new Exception("\"There was an error fetching chart data . Please try again.\"", e);
+            }
+
+        }
+        
+        public async Task<List<ExpensePieChartDTO>?> GetExpensePieChartData(Guid userid , int numberOfMonths)
+        {
+            try
+            {
+                DateTime  endDate = DateTime.UtcNow;
+                DateTime startDate = endDate.AddMonths(-numberOfMonths);
+                
+                var response = await db.TransactionMasters
+                    .AsNoTracking()
+                    .Where(i => i.UserId == userid && i.IsActive == 1 && i.TransactionTypeMasterId == 2 &&  i.TransactionDate >= startDate && i.TransactionDate <= endDate  ) 
+                    .GroupBy(i => i.TransactionCategoryMaster.TransactionCategoryName)
+                    .Select(g => new ExpensePieChartDTO
+                    {
+                        ExpenseCategory = g.Key,
+                        Amount = (decimal)g.Sum(x => x.TransactionAmount)
+                    })
+                    .ToListAsync();
+
+
+                return response;
+            }
+            catch (Exception e)
+            {
+                throw new Exception("\"There was an error fetching chart data . Please try again.\"", e);
+            }
+
+        }
+
+        public async Task<double?>  GetCurrentBalance(Guid userId)
+        {
+            try
+            {
+                var totalTransactions = await db.TransactionMasters
+                    .AsNoTracking()
+                    .Where(i => i.UserId == userId && i.IsActive == 1)
+                    .ToListAsync();
+
+
+
+                return (double)(totalTransactions.Where(i => i.TransactionTypeMasterId == 1)
+                    .Sum(i => i.TransactionAmount) - totalTransactions.Where(i => i.TransactionTypeMasterId == 2)
+                    .Sum(i => i.TransactionAmount)); 
+            }
+            catch (Exception e)
+            {
+                throw new Exception("\"There was an error fetching current balance. Please try again.\"", e);
+            }
+            
+        }
+
+        public async Task<TransactionSummaryDTO?> GetTransactionSummary(Guid userid, int? numberOfMonths)
+        {
+            try
+            {
+                // Calculate date range
+                DateTime endDate = DateTime.UtcNow;
+                DateTime startDate = numberOfMonths.HasValue 
+                    ? DateTime.UtcNow.AddMonths(-numberOfMonths.Value) 
+                    : DateTime.MinValue;
+
+                // Query transactions (single database call)
+                var query = db.TransactionMasters
+                    .AsNoTracking()
+                    .Where(x => x.UserId == userid && x.TransactionDate >= startDate && x.TransactionDate <= endDate);
+
+                // Execute query and calculate in database
+                var summary = await query
+                    .GroupBy(x => x.UserId)
+                    .Select(g => new
+                    {
+                        UserId = g.Key,
+                        TotalIncome = g.Where(t => t.TransactionTypeMasterId == 1).Sum(t => t.TransactionAmount),
+                        TotalExpense = g.Where(t => t.TransactionTypeMasterId == 2).Sum(t => t.TransactionAmount)
+                    })
+                    .FirstOrDefaultAsync();
+
+                if (summary == null)
+                {
+                    return null;
+                }
+
+                var currentBalance = await this.GetCurrentBalance(userid) ?? 0.0;
+
+                return new TransactionSummaryDTO
+                {
+                    UserId = summary.UserId,
+                    TotalExpense = summary.TotalExpense,
+                    TotalIncome = summary.TotalIncome,
+                    CurrentBalance = currentBalance,
+                    NumberOfMonths = numberOfMonths
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("There was an error fetching transaction summary. Please try again.", ex);
+            }
+        }
+
         public TransactionDto AddTransaction(TransactionMaster transaction)
         {
-
             try
             {
 
@@ -239,13 +436,17 @@ namespace Budget_Tracker_WebAPI.Repositories
             }
         }
 
-        public async Task<List<TransactionDto>> GetAllTransactionByUserID(Guid userId, int page, int pageSize)
+        public async Task<PaginatedTransactionDto> GetAllTransactionByUserID(Guid userId, int page, int pageSize)
         {
             try
             {
 
                 var skip = (page - 1) * pageSize;
 
+                var totalRecords = await db.TransactionMasters
+                    .Where(i=>i.UserId == userId &&  i.IsActive == 1)
+                    .CountAsync();
+                
                 var result = await db.TransactionMasters
                     .Include(i => i.TransactionCategoryMaster)
                     .Include(i => i.TransactionTypeMaster)
@@ -272,8 +473,14 @@ namespace Budget_Tracker_WebAPI.Repositories
                         TransactionCategoryMasterId = t.TransactionCategoryMasterId
                     }).OrderByDescending(i => i.CreatedAt).Skip(skip).Take(pageSize).ToListAsync();
 
-
-                return result;
+                var response = new PaginatedTransactionDto
+                {
+                    TotalRecords = totalRecords,
+                    Page = page,
+                    PageSize = pageSize,
+                    TransactionList = result
+                };
+                return response;
             }
             catch (Exception ex)
             {
@@ -540,12 +747,12 @@ namespace Budget_Tracker_WebAPI.Repositories
                 throw new Exception("\"There was an error fetching  transaction category. Please try again.\"", ex); ;
             }
         }
-        public async Task<List<TransactionCategoryMasterDTO>> GetAllTransactionCategories(Guid userMasterID)
+        public async Task<List<TransactionCategoryMasterDTO>> GetAllTransactionCategories(Guid userMasterId , int transactionTypeMasterId)
         {
             try
             {
                 var transactionCategories = await db.TransactionCategoryMasters
-                    .Where(i => i.IsActive == 1 || userMasterID ==  userMasterID)
+                    .Where(i => (i.IsActive == 1  && i.TransactionTypeMasterId == transactionTypeMasterId) || i.UserMasterId ==  userMasterId)
                     .Select(i => new TransactionCategoryMasterDTO
                     {
                         TransactionCategoryMasterId = i.TransactionCategoryMasterId,

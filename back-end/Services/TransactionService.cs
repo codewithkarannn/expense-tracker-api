@@ -15,6 +15,48 @@ namespace Budget_Tracker_WebAPI.Services
             _transactionRepository = transactionRepository;
         }
 
+        public async Task<List<ExpensePieChartDTO>?> GetExpensePieChartData(Guid userid , int numberOfMonths)
+        {
+            try
+            {
+                return  await  _transactionRepository.GetExpensePieChartData(userid, numberOfMonths);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw e;
+            }
+        }
+        
+        
+        
+        public async Task<List<CurrencyMasterDTO>?> GetAllCurrencies()
+        {
+            try
+            {
+                return  await  _transactionRepository.GetAllCurrencies();
+            }
+            catch (Exception e)
+            {
+                
+                throw e;
+            }
+        }
+
+        public async Task<MonthlyExpenseOverviewDTO?> GetMonthlyExpenseLineChartData(Guid userid , int numberOfMonths)
+        {
+            try
+            {
+                return  await  _transactionRepository.GetMonthlyExpenseLineChartData(userid, numberOfMonths);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw e;
+            }
+        }
+        
+        
         public TransactionDto AddTransaction(CreateTransactionDto transactionDTO)
         {
             try
@@ -181,13 +223,13 @@ namespace Budget_Tracker_WebAPI.Services
             }
         }
 
-        public async Task<List<TransactionDto>> GetAllTransactionsByUserID(Guid userID, int page, int pageSize)
+        public async Task<PaginatedTransactionDto> GetAllTransactionsByUserID(Guid userID, int page, int pageSize)
         {
             try
             {
 
                 var transactions = await _transactionRepository.GetAllTransactionByUserID(userID,  page,  pageSize);
-                if (transactions.Count > 0)
+                if (transactions.TransactionList.Count > 0)
                 {
                     return transactions;
                 }
@@ -426,12 +468,12 @@ namespace Budget_Tracker_WebAPI.Services
             }
         }
 
-        public async Task<List<TransactionCategoryMasterDTO>> GetAllTransactionCategories(Guid userMasterID)
+        public async Task<List<TransactionCategoryMasterDTO>> GetAllTransactionCategories(Guid userMasterID , int transactionTypeMasterId)
         {
             try
             {
 
-                var transactionCat = await _transactionRepository.GetAllTransactionCategories(userMasterID);
+                var transactionCat = await _transactionRepository.GetAllTransactionCategories(userMasterID , transactionTypeMasterId);
                 if (transactionCat != null)
                 {
                     var transactionCategoryDTO = transactionCat.Select(i => new TransactionCategoryMasterDTO
@@ -494,6 +536,29 @@ namespace Budget_Tracker_WebAPI.Services
             {
 
                 var transaction = await _transactionRepository.GetTransactionSummary(userId);
+                if (transaction != null)
+                {
+                    return transaction;
+                }
+                else
+                {
+                    throw new KeyNotFoundException("No transaction found ");
+                }
+            }
+            catch (Exception ex)
+            {
+
+                throw new Exception("\"There was an error fetching   transaction. Please try again.\"", ex); ;
+            }
+        }
+
+        
+        public async Task<TransactionSummaryDTO?> GetTransactionSummary(Guid userId , int? numberOfMonths)
+        {
+            try
+            {
+
+                var transaction = await _transactionRepository.GetTransactionSummary(userId, numberOfMonths);
                 if (transaction != null)
                 {
                     return transaction;

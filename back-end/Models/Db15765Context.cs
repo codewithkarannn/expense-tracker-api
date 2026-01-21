@@ -27,6 +27,8 @@ public partial class Db15765Context : DbContext
     public virtual DbSet<UserMaster> UserMasters { get; set; }
 
     public virtual DbSet<UserRoleMaster> UserRoleMasters { get; set; }
+    
+    public virtual DbSet<CurrencyMaster> CurrencyMasters { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -183,7 +185,7 @@ public partial class Db15765Context : DbContext
             entity.Property(e => e.IsActive).HasColumnType("tinyint(4)");
             entity.Property(e => e.LastName).HasMaxLength(145);
             entity.Property(e => e.UserEmail).HasMaxLength(255);
-            entity.Property(e => e.UserMastercol).HasMaxLength(45);
+            //entity.Property(e => e.UserMastercol).HasMaxLength(45);
             entity.Property(e => e.UserPassword).HasMaxLength(255);
             entity.Property(e => e.UserRoleId)
                 .HasColumnType("int(11)")

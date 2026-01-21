@@ -56,7 +56,7 @@ namespace Budget_Tracker_WebAPI.Services
                     UserEmail = registerUserDto.Email,
                     FirstName =  registerUserDto.FirstName,
                     LastName = registerUserDto.LastName,
-                        
+                    CurrencyMasterId =  registerUserDto.CurrencyMasterId,
                     UserRoleId =   2
                 };
 
@@ -109,8 +109,7 @@ namespace Budget_Tracker_WebAPI.Services
             var claims = new[]
             {
             new Claim(ClaimTypes.NameIdentifier, user.UserMasterId.ToString()),
-            new Claim(ClaimTypes.Email, user.UserEmail),
-           
+            new Claim(ClaimTypes.Email, user.UserEmail)
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:SecretKey"]));
@@ -119,6 +118,7 @@ namespace Budget_Tracker_WebAPI.Services
             var token = new JwtSecurityToken(
                 issuer: _configuration["JwtSettings:Issuer"],
                 audience: _configuration["JwtSettings:Audience"],
+                
                 claims: claims,
                 expires: DateTime.Now.AddHours(1),
                                signingCredentials: creds

@@ -11,7 +11,7 @@
         public string? MonthIncome { get; set; }
         public string? DayIncomeChange { get; set; }
         public string? WeekIncomeChange { get; set; }
-        public string?   MonthIncomeChange { get; set; }
+        public string? MonthIncomeChange { get; set; }
 
         public string? TodayExpense { get; set; }
         public string? WeekExpense { get; set; }
@@ -22,5 +22,16 @@
         
         public string? CurrentIncome { get; set; }
 
+    }
+    
+    
+    public class TransactionSummaryDTO
+    {
+        public Guid UserId { get; set; }    
+        public double? CurrentBalance { get; set; }
+        public double? TotalExpense { get; set; }
+        public double? TotalIncome { get; set; }
+        public int? NumberOfMonths { get; set; }
+        
     }
 }

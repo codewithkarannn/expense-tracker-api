@@ -35,36 +35,45 @@ namespace Budget_Tracker_WebAPI.DTOs
 
     }
 
+
+    public class PaginatedTransactionDto
+    {
+        public int TotalRecords { get; set; } 
+        public int PageSize { get; set; } 
+        public int Page { get; set; }
+
+        public List<TransactionDto> TransactionList { get; set; }
+    }
     
-public class CreateTransactionDto
-{
-    [Required]
-    public Guid UserId { get; set; }
+    public class CreateTransactionDto
+    {
+        [Required]
+        public Guid UserId { get; set; }
 
-    [Required]
-    public int TransactionTypeMasterId { get; set; }
+        [Required]
+        public int TransactionTypeMasterId { get; set; }
 
-    [Required]
-    public int TransactionCategoryMasterId { get; set; }
+        [Required]
+        public int TransactionCategoryMasterId { get; set; }
 
-    [Required]
-    public int TransactionPaymentModeId { get; set; }
+        [Required]
+        public int TransactionPaymentModeId { get; set; }
 
-    [Required]
-    [MaxLength(500)]
-    public string TransactionDescription { get; set; } = string.Empty;
+        [Required]
+        [MaxLength(500)]
+        public string TransactionDescription { get; set; } = string.Empty;
 
-    [Required]
-    [Range(0.01, double.MaxValue)]
-    public double TransactionAmount { get; set; }
+        [Required]
+        [Range(0.01, double.MaxValue)]
+        public double TransactionAmount { get; set; }
 
-    [Required]
-    public DateTime TransactionDate { get; set; }
+        [Required]
+        public DateTime TransactionDate { get; set; }
 
-    [MaxLength(1000)]
-    public string? TransactionNote { get; set; }
-}
- 
+        [MaxLength(1000)]
+        public string? TransactionNote { get; set; }
+    }
+     
     
     public partial class TransactionCategoryMasterDTO
     {
@@ -159,4 +168,40 @@ public class CreateTransactionDto
         public bool IsCustom { get; set; }
     }
 
+
+    public class ExpensePieChartDTO
+    {
+        public string ExpenseCategory { get; set; }
+
+        public decimal Amount { get; set; }
+    }
+
+    public class MonthlyExpenseOverviewDTO
+    {
+        public decimal TotalMonthlyExpense { get; set; }
+        public decimal PercentageLastMonthlyExpense { get; set; }
+        public string Sign { get; set; }
+        
+        public List<MonthlyExpenseDTO> MonthlyExpenses { get; set; }
+    }
+
+    public class MonthlyExpenseDTO
+    {
+        public decimal Amount { get; set; }
+        public string Month { get; set; }
+        public int MonthNumber { get; set; }
+        public string Year { get; set; }
+    }
+    
+    
+    public class CurrencyMasterDTO
+    {
+        public int CurrencyMasterId { get; set; }
+    
+        public string CurrencyCode { get; set; }
+        public string CurrencyName { get; set; }
+        public string CurrencySymbol { get; set; }
+  
+       
+    }
 }

@@ -4,6 +4,7 @@ using Budget_Tracker_WebAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Budget_Tracker_WebAPI.Migrations
 {
     [DbContext(typeof(Db15765Context))]
-    partial class Db15765ContextModelSnapshot : ModelSnapshot
+    [Migration("20260118134752_AddCurrencyTable")]
+    partial class AddCurrencyTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -70,17 +73,12 @@ namespace Budget_Tracker_WebAPI.Migrations
                         .HasColumnType("varchar(45)")
                         .HasColumnName("transaction_category_name");
 
-                    b.Property<int?>("TransactionTypeMasterId")
-                        .HasColumnType("int(11)");
-
                     b.Property<Guid?>("UserMasterId")
                         .HasColumnType("char(36)")
                         .HasColumnName("user_master_id");
 
                     b.HasKey("TransactionCategoryMasterId")
                         .HasName("PRIMARY");
-
-                    b.HasIndex("TransactionTypeMasterId");
 
                     b.HasIndex(new[] { "UserMasterId" }, "user_master_id_idx");
 
@@ -293,16 +291,10 @@ namespace Budget_Tracker_WebAPI.Migrations
 
             modelBuilder.Entity("Budget_Tracker_WebAPI.Models.TransactionCategoryMaster", b =>
                 {
-                    b.HasOne("Budget_Tracker_WebAPI.Models.TransactionTypeMaster", "TransactionTypeMaster")
-                        .WithMany("TransactionCategoryMasters")
-                        .HasForeignKey("TransactionTypeMasterId");
-
                     b.HasOne("Budget_Tracker_WebAPI.Models.UserMaster", "UserMaster")
                         .WithMany("TransactionCategoryMasters")
                         .HasForeignKey("UserMasterId")
                         .HasConstraintName("user_master_id");
-
-                    b.Navigation("TransactionTypeMaster");
 
                     b.Navigation("UserMaster");
                 });
@@ -394,8 +386,6 @@ namespace Budget_Tracker_WebAPI.Migrations
 
             modelBuilder.Entity("Budget_Tracker_WebAPI.Models.TransactionTypeMaster", b =>
                 {
-                    b.Navigation("TransactionCategoryMasters");
-
                     b.Navigation("TransactionMasters");
                 });
 

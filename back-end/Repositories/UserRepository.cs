@@ -38,7 +38,7 @@ namespace Budget_Tracker_WebAPI.Repositories
         {
             try
             {
-                return await db.UserMasters.Where(i => i.UserEmail == email).FirstOrDefaultAsync();
+                return await db.UserMasters.Include(i=>i.CurrencyMaster).Where(i => i.UserEmail == email).FirstOrDefaultAsync();
             }
             catch (Exception ex)
             {
@@ -65,7 +65,7 @@ namespace Budget_Tracker_WebAPI.Repositories
         {
             try
             {
-                var user = db.UserMasters.Include(i=>i.UserRole).FirstOrDefault(i => i.UserMasterId == userId);
+                var user = db.UserMasters.Include(i=>i.UserRole).Include(i=>i.CurrencyMaster).FirstOrDefault(i => i.UserMasterId == userId);
 
                 if(user != null)
                 {
@@ -76,6 +76,9 @@ namespace Budget_Tracker_WebAPI.Repositories
                         FirstName =  user.FirstName,
                         LastName =  user.LastName,
                         UserRoleId =  user.UserRoleId,
+                        CurrencyMasterId = user.CurrencyMasterId  ?? null,
+                        CurrencySymbol =  user.CurrencyMaster?.CurrencySymbol ?? null, 
+                        CurrencyCode =  user.CurrencyMaster?.CurrencyCode ?? null,
                         UserRole = user.UserRole.UserRole
                     };
 

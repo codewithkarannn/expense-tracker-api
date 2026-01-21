@@ -6,6 +6,8 @@ namespace Budget_Tracker_WebAPI.Models;
 public partial class TransactionCategoryMaster
 {
     public int TransactionCategoryMasterId { get; set; }
+    
+    public int? TransactionTypeMasterId { get; set; }
 
     public string TransactionCategoryName { get; set; } = null!;
 
@@ -16,4 +18,6 @@ public partial class TransactionCategoryMaster
     public virtual ICollection<TransactionMaster> TransactionMasters { get; set; } = new List<TransactionMaster>();
 
     public virtual UserMaster? UserMaster { get; set; }
+    
+    public virtual TransactionTypeMaster? TransactionTypeMaster { get; set; }
 }
