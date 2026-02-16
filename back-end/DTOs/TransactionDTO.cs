@@ -10,8 +10,7 @@ namespace Budget_Tracker_WebAPI.DTOs
         public Guid UserId { get; set; }
 
         public int TransactionTypeMasterId { get; set; }
-       
-
+        
         public int TransactionCategoryMasterId { get; set; }
         public int? TransactionPaymentModeId { get; set; }
 
@@ -75,7 +74,7 @@ namespace Budget_Tracker_WebAPI.DTOs
     }
      
     
-    public partial class TransactionCategoryMasterDTO
+    public partial class TransactionCategoryMasterDto
     {
         public int TransactionCategoryMasterId { get; set; }
 
@@ -86,7 +85,7 @@ namespace Budget_Tracker_WebAPI.DTOs
     }
 
 
-    public partial class AddTransactionCategoryMasterDTO
+    public partial class AddTransactionCategoryMasterDto
     {
         public int? TransactionCategoryMasterId { get; set; }
 
@@ -96,7 +95,7 @@ namespace Budget_Tracker_WebAPI.DTOs
 
     }
     
-    public partial class TransactionTypeMasterDTO
+    public partial class TransactionTypeMasterDto
     {
         public int TransactionTypeMasterId { get; set; }
 
@@ -107,7 +106,7 @@ namespace Budget_Tracker_WebAPI.DTOs
 
     }
 
-    public partial class AddTransactionTypeMasterDTO
+    public partial class AddTransactionTypeMasterDto
     {
         public int? TransactionTypeMasterId { get; set; }
         public Guid UserMasterId { get; set; }
@@ -121,7 +120,7 @@ namespace Budget_Tracker_WebAPI.DTOs
 
 
  
-    public class EditTransactionDTO
+    public class EditTransactionDto
     {
         public Guid TransactionMasterId { get; set; }
 
@@ -155,7 +154,7 @@ namespace Budget_Tracker_WebAPI.DTOs
     }
 
 
-    public  class TransactionPaymentModeDTO
+    public  class TransactionPaymentModeDto
     {
         public int? PaymentModeId { get; set; }
 
@@ -169,23 +168,23 @@ namespace Budget_Tracker_WebAPI.DTOs
     }
 
 
-    public class ExpensePieChartDTO
+    public class ExpensePieChartDto
     {
         public string ExpenseCategory { get; set; }
 
         public decimal Amount { get; set; }
     }
 
-    public class MonthlyExpenseOverviewDTO
+    public class MonthlyExpenseOverviewDto
     {
         public decimal TotalMonthlyExpense { get; set; }
         public decimal PercentageLastMonthlyExpense { get; set; }
         public string Sign { get; set; }
         
-        public List<MonthlyExpenseDTO> MonthlyExpenses { get; set; }
+        public List<MonthlyExpenseDto> MonthlyExpenses { get; set; }
     }
 
-    public class MonthlyExpenseDTO
+    public class MonthlyExpenseDto
     {
         public decimal Amount { get; set; }
         public string Month { get; set; }
@@ -194,7 +193,7 @@ namespace Budget_Tracker_WebAPI.DTOs
     }
     
     
-    public class CurrencyMasterDTO
+    public class CurrencyMasterDto
     {
         public int CurrencyMasterId { get; set; }
     
@@ -204,4 +203,73 @@ namespace Budget_Tracker_WebAPI.DTOs
   
        
     }
+    
+     public class FixedTransactionDto
+    {
+        public Guid? TransactionMasterId { get; set; } = Guid.Empty;
+
+        public Guid UserId { get; set; }
+
+        public int TransactionTypeMasterId { get; set; }
+        
+        public int TransactionCategoryMasterId { get; set; }
+
+        public int? TransactionPaymentModeId { get; set; }
+
+        public string? TransactionPaymentMode { get; set; } = null!;
+
+        public string? TransactionDescription { get; set; } = null!;
+
+        public double TransactionAmount { get; set; }
+
+        public DateTime TransactionDate { get; set; }
+
+        public string? TransactionNote { get; set; }
+
+        public sbyte? IsActive { get; set; }
+
+        public string? TransactionType { get; set; }
+        
+        public string?  TransactionCategory { get; set; }
+        
+        public DateTime? CreatedAt { get; set; }
+
+        public DateTime? DeletedAt { get; set; }
+        
+        public DateTime? StartDate { get; set; }
+
+        public DateTime? EndDate { get; set; }
+        public int RecurringDay { get; set; }
+
+
+    }
+     
+    public class CreateFixedTransactionDto
+    {
+        public Guid? TransactionMasterId { get; set; } = Guid.Empty;
+
+        public Guid UserId { get; set; }
+
+        public int TransactionTypeMasterId { get; set; }
+        
+        public int TransactionCategoryMasterId { get; set; }
+
+        public int? TransactionPaymentModeId { get; set; }
+        
+        public string? TransactionDescription { get; set; } = null!;
+
+        public double TransactionAmount { get; set; }
+        
+        public string? TransactionNote { get; set; }
+        
+        public DateTime? StartDate { get; set; }
+
+        public DateTime? EndDate { get; set; }
+        
+        public int RecurringDay { get; set; }
+
+    }
+
+
+
 }

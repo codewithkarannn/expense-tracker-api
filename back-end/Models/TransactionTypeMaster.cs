@@ -13,10 +13,11 @@ public partial class TransactionTypeMaster
 
     public Guid? UserMasterId { get; set; }
 
-    public virtual ICollection<TransactionMaster> TransactionMasters { get; set; } = new List<TransactionMaster>();
-    
+    public virtual ICollection<FixedTransactionMaster> FixedTransactionMasters { get; set; } = new List<FixedTransactionMaster>();
+
     public virtual ICollection<TransactionCategoryMaster> TransactionCategoryMasters { get; set; } = new List<TransactionCategoryMaster>();
 
+    public virtual ICollection<TransactionMaster> TransactionMasters { get; set; } = new List<TransactionMaster>();
 
     public virtual UserMaster? UserMaster { get; set; }
 }

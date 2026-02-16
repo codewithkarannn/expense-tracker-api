@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Budget_Tracker_WebAPI.Repositories.BudgetRepo;
+using Budget_Tracker_WebAPI.Services.BudgetService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +23,8 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IBudgetRepository, BudgetRepository>();
+builder.Services.AddScoped<IBudgetService, BudgetService>();
 
 
 
@@ -40,7 +44,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-builder.Services.AddDbContext<Db15765Context>(options =>
+builder.Services.AddDbContext<DbExpenseTrackerContext>(options =>
 {
     options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),
             ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection")))
@@ -93,16 +97,13 @@ else
     app.UseHsts();
 }
 
-// 2. HTTPS Redirection (before static files and routing)
+
 app.UseHttpsRedirection();
 
-// 3. Routing (before CORS and Authentication/Authorization)
+
 app.UseRouting();
 
-// 4. CORS (after routing and before authentication/authorization and endpoints)
 app.UseCors("AllowSpecificOrigin");
-
-// 5. Authentication & Authorization
 app.UseAuthentication();
 app.UseAuthorization();
 

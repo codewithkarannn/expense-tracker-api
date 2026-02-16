@@ -5,44 +5,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Budget_Tracker_WebAPI.Repositories
 {
-    public class TransactionRepository : ITransactionRepository
+    public class TransactionRepository(DbExpenseTrackerContext db) : ITransactionRepository
     {
-        private readonly Db15765Context db;
+        #region Transaction
 
-        public TransactionRepository(Db15765Context _db)
-        {
-
-            this.db = _db;
-
-        }
-
-        
-         public async Task<List<CurrencyMasterDTO>?> GetAllCurrencies()
+        public async Task<MonthlyExpenseOverviewDto?> GetMonthlyExpenseLineChartData(Guid userid, int numberOfMonths)
         {
             try
             {
-                return await db.CurrencyMasters.Select( i=>  new CurrencyMasterDTO
-                {
-                    CurrencyMasterId = i.CurrencyMasterId,
-                    CurrencyCode = i.CurrencyCode,
-                    CurrencyName = i.CurrencyName,
-                    CurrencySymbol = i.CurrencySymbol
-                }).OrderBy(i=>i.CurrencyName).ToListAsync();
-                
-            }
-            catch (Exception e)
-            {
-                throw new Exception("\"There was an error fetching chart data . Please try again.\"", e);
-            }
-        }
-       
-        public async Task<MonthlyExpenseOverviewDTO?> GetMonthlyExpenseLineChartData(Guid userid , int numberOfMonths)
-        {
-            try
-            {
-                
-                
-                DateTime  endDate = DateTime.UtcNow;
+                DateTime endDate = DateTime.UtcNow;
                 DateTime startDate = endDate.AddMonths(-numberOfMonths);
                 decimal percentageChange = 0;
                 string sign = "";
@@ -54,21 +25,21 @@ namespace Budget_Tracker_WebAPI.Repositories
 
                 var response = await db.TransactionMasters
                     .AsNoTracking()
-                    .Where(i => i.UserId == userid && i.IsActive == 1 && i.TransactionTypeMasterId == 2 &&  i.TransactionDate >= startDate && i.TransactionDate <= endDate)
+                    .Where(i => i.UserId == userid && i.IsActive == 1 && i.TransactionTypeMasterId == 2 &&
+                                i.TransactionDate >= startDate && i.TransactionDate <= endDate)
                     .GroupBy(i => new { i.TransactionDate.Year, i.TransactionDate.Month })
-                    .Select(g => new MonthlyExpenseDTO
+                    .Select(g => new MonthlyExpenseDto
                     {
                         Month = CultureInfo.CurrentCulture
                             .DateTimeFormat
                             .GetAbbreviatedMonthName(g.Key.Month),
                         MonthNumber = g.Key.Month,
-                        Year = g.Key.Year.ToString().Substring(2) ,
+                        Year = g.Key.Year.ToString().Substring(2),
                         Amount = (decimal)g.Sum(x => x.TransactionAmount)
                     })
                     .ToListAsync();
 
- 
-                
+
                 var thisMonthTotal = await db.TransactionMasters
                     .Where(i => i.UserId == userid &&
                                 i.IsActive == 1 &&
@@ -84,8 +55,8 @@ namespace Budget_Tracker_WebAPI.Repositories
                                 i.TransactionDate >= startOfLastMonth &&
                                 i.TransactionDate <= endOfLastMonth)
                     .SumAsync(i => (decimal?)i.TransactionAmount) ?? 0;
-                
-                
+
+
                 if (lastMonthTotal > 0)
                 {
                     percentageChange = ((thisMonthTotal - lastMonthTotal) / lastMonthTotal) * 100;
@@ -98,39 +69,41 @@ namespace Budget_Tracker_WebAPI.Repositories
                     sign = "+";
                 }
 
-                var finalReponse = new MonthlyExpenseOverviewDTO
+                var finalReponse = new MonthlyExpenseOverviewDto
                 {
-                    PercentageLastMonthlyExpense =  percentageChange,
-                    TotalMonthlyExpense =  thisMonthTotal,
+                    PercentageLastMonthlyExpense = Math.Round(percentageChange , 2) ,
+                    TotalMonthlyExpense = thisMonthTotal,
                     MonthlyExpenses = response,
-                    Sign =  sign,
+                    Sign = sign,
                 };
-                
+
                 return finalReponse;
             }
             catch (Exception e)
             {
                 throw new Exception("\"There was an error fetching chart data . Please try again.\"", e);
             }
-
         }
-        
-        public async Task<List<ExpensePieChartDTO>?> GetExpensePieChartData(Guid userid , int numberOfMonths)
+
+        public async Task<List<ExpensePieChartDto>?> GetExpensePieChartData(Guid userid, int numberOfMonths)
         {
             try
             {
-                DateTime  endDate = DateTime.UtcNow;
+                DateTime endDate = DateTime.UtcNow;
                 DateTime startDate = endDate.AddMonths(-numberOfMonths);
-                
+
                 var response = await db.TransactionMasters
                     .AsNoTracking()
-                    .Where(i => i.UserId == userid && i.IsActive == 1 && i.TransactionTypeMasterId == 2 &&  i.TransactionDate >= startDate && i.TransactionDate <= endDate  ) 
+                    .Where(i => i.UserId == userid && i.IsActive == 1 && i.TransactionTypeMasterId == 2 &&
+                                i.TransactionDate >= startDate && i.TransactionDate <= endDate)
                     .GroupBy(i => i.TransactionCategoryMaster.TransactionCategoryName)
-                    .Select(g => new ExpensePieChartDTO
+                    .Select(g => new ExpensePieChartDto
                     {
                         ExpenseCategory = g.Key,
                         Amount = (decimal)g.Sum(x => x.TransactionAmount)
                     })
+                    .OrderBy(g=>g.Amount)
+                    .Take(5)
                     .ToListAsync();
 
 
@@ -140,10 +113,9 @@ namespace Budget_Tracker_WebAPI.Repositories
             {
                 throw new Exception("\"There was an error fetching chart data . Please try again.\"", e);
             }
-
         }
 
-        public async Task<double?>  GetCurrentBalance(Guid userId)
+        public async Task<double?> GetCurrentBalance(Guid userId)
         {
             try
             {
@@ -153,26 +125,25 @@ namespace Budget_Tracker_WebAPI.Repositories
                     .ToListAsync();
 
 
-
                 return (double)(totalTransactions.Where(i => i.TransactionTypeMasterId == 1)
                     .Sum(i => i.TransactionAmount) - totalTransactions.Where(i => i.TransactionTypeMasterId == 2)
-                    .Sum(i => i.TransactionAmount)); 
+                    .Sum(i => i.TransactionAmount));
             }
             catch (Exception e)
             {
                 throw new Exception("\"There was an error fetching current balance. Please try again.\"", e);
             }
-            
         }
 
-        public async Task<TransactionSummaryDTO?> GetTransactionSummary(Guid userid, int? numberOfMonths)
+        public async Task<TransactionSummaryDto?> GetTransactionSummary(Guid userid, int? numberOfMonths)
         {
             try
             {
                 // Calculate date range
                 DateTime endDate = DateTime.UtcNow;
-                DateTime startDate = numberOfMonths.HasValue 
-                    ? DateTime.UtcNow.AddMonths(-numberOfMonths.Value) 
+
+                DateTime startDate = numberOfMonths.HasValue
+                    ? DateTime.UtcNow.AddMonths(-numberOfMonths.Value)
                     : DateTime.MinValue;
 
                 // Query transactions (single database call)
@@ -190,7 +161,13 @@ namespace Budget_Tracker_WebAPI.Repositories
                         TotalExpense = g.Where(t => t.TransactionTypeMasterId == 2).Sum(t => t.TransactionAmount)
                     })
                     .FirstOrDefaultAsync();
-
+                var fromDate = DateTime.UtcNow.AddMonths(-3);
+                var averageMonthlyExpense = query
+                    .Where(x => x.TransactionTypeMasterId == 2 )
+                    .GroupBy(x => new { x.TransactionDate.Year , x.TransactionDate.Month })
+                    .Select(g => g.Sum(x=>x.TransactionAmount))
+                    .Average();
+                    
                 if (summary == null)
                 {
                     return null;
@@ -198,12 +175,13 @@ namespace Budget_Tracker_WebAPI.Repositories
 
                 var currentBalance = await this.GetCurrentBalance(userid) ?? 0.0;
 
-                return new TransactionSummaryDTO
+                return new TransactionSummaryDto
                 {
                     UserId = summary.UserId,
                     TotalExpense = summary.TotalExpense,
                     TotalIncome = summary.TotalIncome,
                     CurrentBalance = currentBalance,
+                    AverageMonthlyExpense = averageMonthlyExpense,
                     NumberOfMonths = numberOfMonths
                 };
             }
@@ -217,9 +195,7 @@ namespace Budget_Tracker_WebAPI.Repositories
         {
             try
             {
-
-
-                var newEntity =  db.TransactionMasters.Add(transaction);
+                var newEntity = db.TransactionMasters.Add(transaction);
                 db.SaveChanges();
 
                 return new TransactionDto
@@ -236,93 +212,275 @@ namespace Budget_Tracker_WebAPI.Repositories
                     TransactionTypeMasterId = newEntity.Entity.TransactionTypeMasterId,
                     UserId = newEntity.Entity.UserId,
                     CreatedAt = newEntity.Entity.CreatedAt
-
                 };
-
             }
             catch (Exception ex)
             {
-
                 throw new Exception("\"There was an error add new transaction. Please try again.\"", ex);
             }
         }
+        #endregion
 
-        public TransactionCategoryMasterDTO AddTransactionCategory(TransactionCategoryMaster model)
+        public async Task<List<CurrencyMasterDto>?> GetAllCurrencies()
         {
-
             try
             {
+                return await db.CurrencyMasters.Select(i => new CurrencyMasterDto
+                {
+                    CurrencyMasterId = i.CurrencyMasterId,
+                    CurrencyCode = i.CurrencyCode,
+                    CurrencyName = i.CurrencyName,
+                    CurrencySymbol = i.CurrencySymbol
+                }).OrderBy(i => i.CurrencyName).ToListAsync();
+            }
+            catch (Exception e)
+            {
+                throw new Exception("\"There was an error fetching chart data . Please try again.\"", e);
+            }
+        }
 
-
-                var newEntity =  db.TransactionCategoryMasters.Add(model);
+        #region FixedTransactions
+        public FixedTransactionDto AddFixedTransaction(FixedTransactionMaster transaction)
+        {
+            try
+            {
+                var newEntity = db.FixedTransactionMasters.Add(transaction);
                 db.SaveChanges();
 
-                return new TransactionCategoryMasterDTO
+                return new FixedTransactionDto
+                {
+                    TransactionMasterId = newEntity.Entity.FixedTransactionMasterId,
+                    TransactionAmount =(double)newEntity.Entity.TransactionAmount,
+                    IsActive = newEntity.Entity.IsActive,
+                    StartDate = newEntity.Entity.StartDate,
+                    EndDate = newEntity.Entity.EndDate,
+                    RecurringDay =  newEntity.Entity.RecurringDay,
+                    TransactionCategory =   db.TransactionCategoryMasters.Where(i=>i.TransactionCategoryMasterId ==    newEntity.Entity.TransactionCategoryMasterId).Select(i=>i.TransactionCategoryName).FirstOrDefault(),
+                     // TransactionDate = newEntity.Entity.TransactionDate,
+                    TransactionCategoryMasterId = newEntity.Entity.TransactionCategoryMasterId,
+                    TransactionDescription = newEntity.Entity.TransactionDescription ??  null,
+                    TransactionNote = newEntity.Entity.TransactionNote,
+                    TransactionType =  db.TransactionTypeMasters.Where(i => i.TransactionTypeMasterId == newEntity.Entity.TransactionTypeMasterId).Select(i => i.TransactionTypename).FirstOrDefault(),
+                    TransactionTypeMasterId = newEntity.Entity.TransactionTypeMasterId,
+                    UserId = newEntity.Entity.UserId,
+                    CreatedAt = newEntity.Entity.CreatedAt
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("\"There was an error add new transaction. Please try again.\"", ex);
+            }
+        }
+        public FixedTransactionDto UpdateFixedTransaction(FixedTransactionMaster transaction)
+        {
+            try
+            {
+                var newEntity = db.FixedTransactionMasters.Update(transaction);
+                db.SaveChanges();
+
+                return new FixedTransactionDto
+                {
+                    TransactionMasterId = newEntity.Entity.FixedTransactionMasterId,
+                    TransactionAmount =(double)newEntity.Entity.TransactionAmount,
+                    IsActive = newEntity.Entity.IsActive,
+                    StartDate = newEntity.Entity.StartDate,
+                    EndDate = newEntity.Entity.EndDate,
+                    RecurringDay =  newEntity.Entity.RecurringDay,
+                    TransactionCategory =   db.TransactionCategoryMasters.Where(i=>i.TransactionCategoryMasterId ==    newEntity.Entity.TransactionCategoryMasterId).Select(i=>i.TransactionCategoryName).FirstOrDefault(),
+                    // TransactionDate = newEntity.Entity.TransactionDate,
+                    TransactionCategoryMasterId = newEntity.Entity.TransactionCategoryMasterId,
+                    TransactionDescription = newEntity.Entity.TransactionDescription ??  null,
+                    TransactionNote = newEntity.Entity.TransactionNote,
+                    TransactionType =  db.TransactionTypeMasters.Where(i => i.TransactionTypeMasterId == newEntity.Entity.TransactionTypeMasterId).Select(i => i.TransactionTypename).FirstOrDefault(),
+                    TransactionTypeMasterId = newEntity.Entity.TransactionTypeMasterId,
+                    UserId = newEntity.Entity.UserId,
+                    CreatedAt = newEntity.Entity.CreatedAt
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("\"There was an error add new transaction. Please try again.\"", ex);
+            }
+        }
+        public FixedTransactionDto DeleteFixedTransaction(FixedTransactionMaster transaction)
+        {
+            try
+            {
+                transaction.DeletedAt =  DateTime.UtcNow;
+                transaction.IsActive = 0;
+                var newEntity = db.FixedTransactionMasters.Update(transaction);
+                db.SaveChanges();
+
+                return new FixedTransactionDto
+                {
+                    TransactionMasterId = newEntity.Entity.FixedTransactionMasterId,
+                    TransactionAmount =(double)newEntity.Entity.TransactionAmount,
+                    IsActive = newEntity.Entity.IsActive,
+                    StartDate = newEntity.Entity.StartDate,
+                    EndDate = newEntity.Entity.EndDate,
+                    RecurringDay =  newEntity.Entity.RecurringDay,
+                    TransactionCategory =   db.TransactionCategoryMasters.Where(i=>i.TransactionCategoryMasterId ==    newEntity.Entity.TransactionCategoryMasterId).Select(i=>i.TransactionCategoryName).FirstOrDefault(),
+                    // TransactionDate = newEntity.Entity.TransactionDate,
+                    TransactionCategoryMasterId = newEntity.Entity.TransactionCategoryMasterId,
+                    TransactionDescription = newEntity.Entity.TransactionDescription ??  null,
+                    TransactionNote = newEntity.Entity.TransactionNote,
+                    TransactionType =  db.TransactionTypeMasters.Where(i => i.TransactionTypeMasterId == newEntity.Entity.TransactionTypeMasterId).Select(i => i.TransactionTypename).FirstOrDefault(),
+                    TransactionTypeMasterId = newEntity.Entity.TransactionTypeMasterId,
+                    UserId = newEntity.Entity.UserId,
+                    CreatedAt = newEntity.Entity.CreatedAt
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("\"There was an error add new transaction. Please try again.\"", ex);
+            }
+        }
+        public async Task<List<FixedTransactionDto>?> GetAllFixedTransactions(Guid userId)
+        {
+            try
+            {
+                var response  = await db.FixedTransactionMasters
+                    .AsNoTracking()
+                    .Include(i=>i.TransactionCategoryMaster)
+                    .Include(i=>i.TransactionPaymentmode)
+                    .Include(i=>i.TransactionTypeMaster)
+                    .Where(i => i.UserId == userId && i.IsActive == 1)
+                    .Select( i=> new FixedTransactionDto
+                    {
+                        TransactionMasterId = i.FixedTransactionMasterId,
+                        TransactionAmount =(double)i.TransactionAmount,
+                        IsActive = i.IsActive,
+                        StartDate = i.StartDate,
+                        EndDate = i.EndDate,
+                        RecurringDay =  i.RecurringDay,
+                        TransactionCategory =   i.TransactionCategoryMaster.TransactionCategoryName,
+                        // TransactionDate = i.TransactionDate,
+                        TransactionCategoryMasterId = i.TransactionCategoryMasterId,
+                        TransactionDescription = i.TransactionDescription ??  null,
+                        TransactionNote = i.TransactionNote,
+                        TransactionType =  i.TransactionTypeMaster.TransactionTypename,
+                        
+                        TransactionPaymentMode = i.TransactionPaymentmode != null ? i.TransactionPaymentmode.PaymentMode : null,
+                        TransactionPaymentModeId =  i.TransactionPaymentmodeId,
+                        TransactionTypeMasterId = i.TransactionTypeMasterId,
+                        UserId = i.UserId,
+                        CreatedAt = i.CreatedAt
+                    })
+                    .ToListAsync();
+
+              
+                    return response;
+               
+            }
+            catch (Exception e)
+            {
+                throw new Exception("\"There was an error fetching fixed transaction. Please try again.\"", e);
+            }
+        }
+        public async Task<FixedTransactionDto?> GetFixedTransaction(Guid fixedTransactionId)
+        {
+            try
+            {
+                var response  = await db.FixedTransactionMasters
+                    .AsNoTracking()
+                    .Include(i=>i.TransactionCategoryMaster)
+                    .Include(i=>i.TransactionPaymentmode)
+                    .Include(i=>i.TransactionTypeMaster)
+                    .Where(i => i.FixedTransactionMasterId == fixedTransactionId && i.IsActive == 1)
+                    .Select( i=> new FixedTransactionDto
+                    {
+                        TransactionMasterId = i.FixedTransactionMasterId,
+                        TransactionAmount =(double)i.TransactionAmount,
+                        IsActive = i.IsActive,
+                        StartDate = i.StartDate,
+                        EndDate = i.EndDate,
+                        RecurringDay =  i.RecurringDay,
+                        TransactionCategory =   i.TransactionCategoryMaster.TransactionCategoryName,
+                        // TransactionDate = i.TransactionDate,
+                        TransactionCategoryMasterId = i.TransactionCategoryMasterId,
+                        TransactionDescription = i.TransactionDescription ??  null,
+                        TransactionNote = i.TransactionNote,
+                        TransactionType =  i.TransactionTypeMaster.TransactionTypename,
+                        
+                        TransactionPaymentMode = i.TransactionPaymentmode != null ? i.TransactionPaymentmode.PaymentMode : null,
+                        TransactionPaymentModeId =  i.TransactionPaymentmodeId,
+                        TransactionTypeMasterId = i.TransactionTypeMasterId,
+                        UserId = i.UserId,
+                        CreatedAt = i.CreatedAt
+                    })
+                    .FirstOrDefaultAsync();
+
+              
+                    return response;
+               
+            }
+            catch (Exception e)
+            {
+                throw new Exception("\"There was an error fetching fixed transaction. Please try again.\"", e);
+            }
+        }
+        
+        #endregion
+    
+        
+        
+
+        public TransactionCategoryMasterDto AddTransactionCategory(TransactionCategoryMaster model)
+        {
+            try
+            {
+                var newEntity = db.TransactionCategoryMasters.Add(model);
+                db.SaveChanges();
+
+                return new TransactionCategoryMasterDto
                 {
                     TransactionCategoryMasterId = newEntity.Entity.TransactionCategoryMasterId,
                     TransactionCategoryName = newEntity.Entity.TransactionCategoryName,
-
                 };
-
             }
             catch (Exception ex)
             {
-
                 throw new Exception("\"There was an error add new transaction. Please try again.\"", ex);
             }
         }
 
-        public  TransactionTypeMasterDTO AddTransactionType(TransactionTypeMaster model)
+        public TransactionTypeMasterDto AddTransactionType(TransactionTypeMaster model)
         {
-
             try
             {
-
-
-                var newEntity =  db.TransactionTypeMasters.Add(model);
+                var newEntity = db.TransactionTypeMasters.Add(model);
                 db.SaveChanges();
 
-                return new TransactionTypeMasterDTO
+                return new TransactionTypeMasterDto
                 {
                     TransactionTypeMasterId = newEntity.Entity.TransactionTypeMasterId,
                     TransactionTypename = newEntity.Entity.TransactionTypename,
-
-
                 };
-
             }
             catch (Exception ex)
             {
-
                 throw new Exception("\"There was an error add new transaction. Please try again.\"", ex);
             }
         }
 
-        public TransactionPaymentModeDTO AddPaymentMode(TransactionPaymentMode model)
+        public TransactionPaymentModeDto AddPaymentMode(TransactionPaymentMode model)
         {
-
             try
             {
-
-
-                var newEntity =  db.TransactionPaymentModes.Add(model);
+                var newEntity = db.TransactionPaymentModes.Add(model);
                 db.SaveChanges();
 
-                return new TransactionPaymentModeDTO
+                return new TransactionPaymentModeDto
                 {
                     PaymentModeId = newEntity.Entity.PaymentModeId,
                     PaymentMode = newEntity.Entity.PaymentMode,
                     IsActive = 1,
                     IsCustom = true,
                     UserMasterId = newEntity.Entity.UserMasterId
-
-
                 };
-
             }
             catch (Exception ex)
             {
-
                 throw new Exception("\"There was an error add new transaction. Please try again.\"", ex);
             }
         }
@@ -330,54 +488,43 @@ namespace Budget_Tracker_WebAPI.Repositories
 
         public void DeleteTransactionType(TransactionTypeMaster model)
         {
-
             try
             {
-
                 model.IsActive = 0;
                 db.TransactionTypeMasters.Update(model);
                 db.SaveChanges();
-
             }
             catch (Exception ex)
             {
-
                 throw new Exception("\"There was an error deleting  transaction type . Please try again.\"", ex);
             }
         }
 
         public void DeletePaymentMode(TransactionPaymentMode model)
         {
-
             try
             {
-
                 model.IsActive = 0;
                 db.TransactionPaymentModes.Update(model);
                 db.SaveChanges();
-
             }
             catch (Exception ex)
             {
-
-                throw new Exception("\"There was an error deleting  transaction payement mode . Please try again.\"", ex);
+                throw new Exception("\"There was an error deleting  transaction payement mode . Please try again.\"",
+                    ex);
             }
         }
 
         public void DeleteTransactionCategory(TransactionCategoryMaster model)
         {
-
             try
             {
-
                 model.IsActive = 0;
                 db.TransactionCategoryMasters.Update(model);
                 db.SaveChangesAsync();
-
             }
             catch (Exception ex)
             {
-
                 throw new Exception("\"There was an error add new transaction. Please try again.\"", ex);
             }
         }
@@ -385,10 +532,8 @@ namespace Budget_Tracker_WebAPI.Repositories
 
         public TransactionDto EditTransaction(TransactionMaster transaction)
         {
-
             try
             {
-
                 var entity = db.TransactionMasters.Update(transaction);
                 db.SaveChanges();
 
@@ -408,30 +553,24 @@ namespace Budget_Tracker_WebAPI.Repositories
                     CreatedAt = entity.Entity.CreatedAt,
                     DeletedAt = entity.Entity.DeletedAt
                 };
-
-
             }
             catch (Exception ex)
             {
-
                 throw new Exception("\"There was an error add new user. Please try again.\"", ex);
             }
         }
 
         public void Delete(TransactionMaster transaction)
         {
-
             try
             {
                 transaction.IsActive = 0;
                 transaction.DeletedAt = DateTime.UtcNow;
                 db.TransactionMasters.Update(transaction);
                 db.SaveChanges();
-
             }
             catch (Exception ex)
             {
-
                 throw new Exception("\"There was an error editing your transaction. Please try again.\"", ex);
             }
         }
@@ -440,13 +579,12 @@ namespace Budget_Tracker_WebAPI.Repositories
         {
             try
             {
-
                 var skip = (page - 1) * pageSize;
 
                 var totalRecords = await db.TransactionMasters
-                    .Where(i=>i.UserId == userId &&  i.IsActive == 1)
+                    .Where(i => i.UserId == userId && i.IsActive == 1)
                     .CountAsync();
-                
+
                 var result = await db.TransactionMasters
                     .Include(i => i.TransactionCategoryMaster)
                     .Include(i => i.TransactionTypeMaster)
@@ -454,13 +592,15 @@ namespace Budget_Tracker_WebAPI.Repositories
                     .Where(i => i.UserId == userId && i.IsActive == 1)
                     .Select(t => new TransactionDto
                     {
-
                         TransactionTypeMasterId = t.TransactionTypeMasterId,
                         TransactionDescription = t.TransactionDescription,
                         TransactionAmount = t.TransactionAmount,
                         TransactionDate = t.TransactionDate,
-                        TransactionPaymentModeId = (t.TransactionPaymentmode != null) ? t.TransactionPaymentmodeId : null,
-                        TransactionPaymentMode = (t.TransactionPaymentmode != null) ? t.TransactionPaymentmode.PaymentMode : null,
+                        TransactionPaymentModeId =
+                            (t.TransactionPaymentmode != null) ? t.TransactionPaymentmodeId : null,
+                        TransactionPaymentMode = (t.TransactionPaymentmode != null)
+                            ? t.TransactionPaymentmode.PaymentMode
+                            : null,
                         TransactionCategory = t.TransactionCategoryMaster.TransactionCategoryName,
                         TransactionMasterId = t.TransactionMasterId,
                         TransactionNote = t.TransactionNote,
@@ -484,10 +624,10 @@ namespace Budget_Tracker_WebAPI.Repositories
             }
             catch (Exception ex)
             {
-
-                throw new Exception("\"There was an error fetching  your transactions. Please try again.\"", ex); ;
+                throw new Exception("\"There was an error fetching  your transactions. Please try again.\"", ex);
             }
         }
+
         public async Task<List<TransactionDto>> GetRecentTransactionsByUserID(Guid userId)
         {
             try
@@ -499,7 +639,6 @@ namespace Budget_Tracker_WebAPI.Repositories
                     .Where(i => i.UserId == userId && i.IsActive == 1)
                     .Select(t => new TransactionDto
                     {
-
                         TransactionTypeMasterId = t.TransactionTypeMasterId,
                         TransactionDescription = t.TransactionDescription,
                         TransactionAmount = t.TransactionAmount,
@@ -513,30 +652,27 @@ namespace Budget_Tracker_WebAPI.Repositories
                         UserId = t.UserId,
                         IsActive = t.IsActive,
                         TransactionPaymentModeId = t.TransactionPaymentmodeId ?? null,
-                        TransactionPaymentMode = t.TransactionPaymentmode.PaymentMode ?? null,
+                        TransactionPaymentMode = t.TransactionPaymentmode!.PaymentMode,
                         TransactionCategoryMasterId = t.TransactionCategoryMasterId
                     }).OrderByDescending(i => i.CreatedAt).Take(5).ToListAsync();
-
-
-
             }
             catch (Exception ex)
             {
-
-                throw new Exception("\"There was an error fetching  your transactions. Please try again.\"", ex); ;
+                throw new Exception("\"There was an error fetching  your transactions. Please try again.\"", ex);
+                ;
             }
         }
-        public TransactionDto GetTransactionByTransactionMasterID(Guid transactionMasterID)
+
+        public TransactionDto GetTransactionByTransactionMasterID(Guid transactionMasterId)
         {
             try
             {
                 var transaction = db.TransactionMasters.AsNoTracking()
                     .Include(i => i.TransactionCategoryMaster)
                     .Include(i => i.TransactionTypeMaster)
-                    .Where(i => i.TransactionMasterId == transactionMasterID && i.IsActive == 1)
+                    .Where(i => i.TransactionMasterId == transactionMasterId && i.IsActive == 1)
                     .Select(t => new TransactionDto
                     {
-
                         TransactionTypeMasterId = t.TransactionTypeMasterId,
                         TransactionDescription = t.TransactionDescription,
                         TransactionAmount = t.TransactionAmount,
@@ -560,12 +696,11 @@ namespace Budget_Tracker_WebAPI.Repositories
                 {
                     return null;
                 }
-
             }
             catch (Exception ex)
             {
-
-                throw new Exception("\"There was an error deleting your transaction. Please try again.\"", ex); ;
+                throw new Exception("\"There was an error deleting your transaction. Please try again.\"", ex);
+                ;
             }
         }
 
@@ -573,7 +708,6 @@ namespace Budget_Tracker_WebAPI.Repositories
         {
             try
             {
-
                 // Ensure connection is open
 
                 var model = db.TransactionTypeMasters
@@ -581,13 +715,11 @@ namespace Budget_Tracker_WebAPI.Repositories
                     .Where(i => i.TransactionTypeMasterId == transactionTypeMasterId && i.IsActive == 1)
                     .Select(t => new TransactionTypeMaster
                     {
-
                         TransactionTypeMasterId = t.TransactionTypeMasterId,
                         TransactionTypename = t.TransactionTypename,
                         UserMasterId = t.UserMasterId,
 
                         IsActive = t.IsActive,
-
                     }).FirstOrDefault();
 
                 if (model != null)
@@ -598,16 +730,16 @@ namespace Budget_Tracker_WebAPI.Repositories
                 {
                     return null;
                 }
-
             }
             catch (Exception ex)
             {
-
-                throw new Exception("\"There was an error fetching  transaction type. Please try again.\"", ex); ;
+                throw new Exception("\"There was an error fetching  transaction type. Please try again.\"", ex);
+                ;
             }
         }
 
-        public TransactionCategoryMaster GetTransactionCategoryByTransactionCategoryMasterID(int transactionCategoryMasterId)
+        public TransactionCategoryMaster GetTransactionCategoryByTransactionCategoryMasterID(
+            int transactionCategoryMasterId)
         {
             try
             {
@@ -616,13 +748,11 @@ namespace Budget_Tracker_WebAPI.Repositories
                     .Where(i => i.TransactionCategoryMasterId == transactionCategoryMasterId && i.IsActive == 1)
                     .Select(t => new TransactionCategoryMaster
                     {
-
                         TransactionCategoryMasterId = t.TransactionCategoryMasterId,
                         TransactionCategoryName = t.TransactionCategoryName,
                         UserMasterId = t.UserMasterId,
 
                         IsActive = t.IsActive,
-
                     }).FirstOrDefault();
 
                 if (model != null)
@@ -633,16 +763,16 @@ namespace Budget_Tracker_WebAPI.Repositories
                 {
                     return null;
                 }
-
             }
             catch (Exception ex)
             {
-
-                throw new Exception("\"There was an error fetching  transaction type. Please try again.\"", ex); ;
+                throw new Exception("\"There was an error fetching  transaction type. Please try again.\"", ex);
+                ;
             }
         }
 
-        public TransactionPaymentMode GetTransactionPaymentModeByTransactionPayementModeMasterID(int transactionPaymentModeMasterId)
+        public TransactionPaymentMode GetTransactionPaymentModeByTransactionPayementModeMasterID(
+            int transactionPaymentModeMasterId)
         {
             try
             {
@@ -651,14 +781,12 @@ namespace Budget_Tracker_WebAPI.Repositories
                     .Where(i => i.PaymentModeId == transactionPaymentModeMasterId && i.IsActive == 1)
                     .Select(t => new TransactionPaymentMode
                     {
-
                         PaymentModeId = t.PaymentModeId,
                         PaymentMode = t.PaymentMode,
 
                         UserMasterId = t.UserMasterId,
 
                         IsActive = t.IsActive,
-
                     }).FirstOrDefault();
 
                 if (model != null)
@@ -669,12 +797,11 @@ namespace Budget_Tracker_WebAPI.Repositories
                 {
                     return null;
                 }
-
             }
             catch (Exception ex)
             {
-
-                throw new Exception("\"There was an error fetching  transaction type. Please try again.\"", ex); ;
+                throw new Exception("\"There was an error fetching  transaction type. Please try again.\"", ex);
+                ;
             }
         }
 
@@ -683,7 +810,9 @@ namespace Budget_Tracker_WebAPI.Repositories
         {
             try
             {
-                var transactionType = await db.TransactionTypeMasters.AsNoTracking().FirstOrDefaultAsync(i => i.TransactionTypename.ToLower().Trim() == typeName.ToLower().Trim() && (i.UserMasterId == userID || i.UserMasterId == null) && i.IsActive == 1);
+                var transactionType = await db.TransactionTypeMasters.AsNoTracking().FirstOrDefaultAsync(i =>
+                    i.TransactionTypename.ToLower().Trim() == typeName.ToLower().Trim() &&
+                    (i.UserMasterId == userID || i.UserMasterId == null) && i.IsActive == 1);
 
                 if (transactionType != null)
                 {
@@ -693,12 +822,11 @@ namespace Budget_Tracker_WebAPI.Repositories
                 {
                     return false;
                 }
-
             }
             catch (Exception ex)
             {
-
-                throw new Exception("\"There was an error fetching  transaction type. Please try again.\"", ex); ;
+                throw new Exception("\"There was an error fetching  transaction type. Please try again.\"", ex);
+                ;
             }
         }
 
@@ -706,7 +834,9 @@ namespace Budget_Tracker_WebAPI.Repositories
         {
             try
             {
-                var transactionType = await db.TransactionPaymentModes.AsNoTracking().FirstOrDefaultAsync(i => i.PaymentMode.ToLower().Trim() == paymentMode.ToLower().Trim() && (i.UserMasterId == userID || i.UserMasterId == null) && i.IsActive == 1);
+                var transactionType = await db.TransactionPaymentModes.AsNoTracking().FirstOrDefaultAsync(i =>
+                    i.PaymentMode.ToLower().Trim() == paymentMode.ToLower().Trim() &&
+                    (i.UserMasterId == userID || i.UserMasterId == null) && i.IsActive == 1);
 
                 if (transactionType != null)
                 {
@@ -716,12 +846,11 @@ namespace Budget_Tracker_WebAPI.Repositories
                 {
                     return false;
                 }
-
             }
             catch (Exception ex)
             {
-
-                throw new Exception("\"There was an error fetching  transaction type. Please try again.\"", ex); ;
+                throw new Exception("\"There was an error fetching  transaction type. Please try again.\"", ex);
+                ;
             }
         }
 
@@ -729,7 +858,9 @@ namespace Budget_Tracker_WebAPI.Repositories
         {
             try
             {
-                var category = await db.TransactionCategoryMasters.AsNoTracking().FirstOrDefaultAsync(i => i.TransactionCategoryName.ToLower().Trim() == categoryName.ToLower().Trim() && (i.UserMasterId == userID || i.UserMasterId == null) && i.IsActive == 1);
+                var category = await db.TransactionCategoryMasters.AsNoTracking().FirstOrDefaultAsync(i =>
+                    i.TransactionCategoryName.ToLower().Trim() == categoryName.ToLower().Trim() &&
+                    (i.UserMasterId == userID || i.UserMasterId == null) && i.IsActive == 1);
 
                 if (category != null)
                 {
@@ -739,100 +870,93 @@ namespace Budget_Tracker_WebAPI.Repositories
                 {
                     return false;
                 }
-
             }
             catch (Exception ex)
             {
-
-                throw new Exception("\"There was an error fetching  transaction category. Please try again.\"", ex); ;
+                throw new Exception("\"There was an error fetching  transaction category. Please try again.\"", ex);
+                ;
             }
         }
-        public async Task<List<TransactionCategoryMasterDTO>> GetAllTransactionCategories(Guid userMasterId , int transactionTypeMasterId)
+
+        public async Task<List<TransactionCategoryMasterDto>> GetAllTransactionCategories(Guid userMasterId,
+            int transactionTypeMasterId)
         {
             try
             {
                 var transactionCategories = await db.TransactionCategoryMasters
-                    .Where(i => (i.IsActive == 1  && i.TransactionTypeMasterId == transactionTypeMasterId) || i.UserMasterId ==  userMasterId)
-                    .Select(i => new TransactionCategoryMasterDTO
+                    .Where(i => (i.IsActive == 1 && i.TransactionTypeMasterId == transactionTypeMasterId) ||
+                                i.UserMasterId == userMasterId)
+                    .Select(i => new TransactionCategoryMasterDto
                     {
                         TransactionCategoryMasterId = i.TransactionCategoryMasterId,
                         TransactionCategoryName = i.TransactionCategoryName,
                         IsCustom = i.UserMasterId != null
                     })
-                    .OrderBy(i=>i.TransactionCategoryName)
+                    .OrderBy(i => i.TransactionCategoryName)
                     .ToListAsync();
 
                 return transactionCategories;
             }
             catch (Exception ex)
             {
-
-                throw new Exception("\"There was an error fetching categories . Please try again.\"", ex); ;
+                throw new Exception("\"There was an error fetching categories . Please try again.\"", ex);
+                ;
             }
         }
 
-        public async Task<List<TransactionTypeMasterDTO>> GetAllTransactionTypes(Guid? userMasterID)
+        public async Task<List<TransactionTypeMasterDto>> GetAllTransactionTypes(Guid? userMasterID)
         {
             try
             {
-
-
-
                 var transactionsTypes = db.TransactionTypeMasters
                     .AsNoTracking()
                     .Where(i => i.IsActive == 1 && (i.UserMasterId == userMasterID || i.UserMasterId == null))
                     .Select(i =>
-
-                    new TransactionTypeMasterDTO
-                    {
-
-                        TransactionTypeMasterId = i.TransactionTypeMasterId,
-                        TransactionTypename = i.TransactionTypename,
-                        IsCustom = (i.UserMasterId != null) ? true : false,
-                    }
+                        new TransactionTypeMasterDto
+                        {
+                            TransactionTypeMasterId = i.TransactionTypeMasterId,
+                            TransactionTypename = i.TransactionTypename,
+                            IsCustom = (i.UserMasterId != null) ? true : false,
+                        }
                     ).ToList();
 
                 return transactionsTypes;
             }
             catch (Exception ex)
             {
-
-                throw new Exception("\"There was an error fetching types . Please try again.\"", ex); ;
+                throw new Exception("\"There was an error fetching types . Please try again.\"", ex);
+                ;
             }
         }
 
-        public async Task<List<TransactionPaymentModeDTO>> GetAllTransactionPaymentMode(Guid? userMasterID)
+        public async Task<List<TransactionPaymentModeDto>> GetAllTransactionPaymentMode(Guid? userMasterId)
         {
             try
             {
-
-
-
-                var transactionsPayementModes = db.TransactionPaymentModes.AsNoTracking().Where(i => i.IsActive == 1 /*&& (i.UserMasterId == userMasterID || i.UserMasterId == null)*/).Select(i =>
-
-                    new TransactionPaymentModeDTO
-                    {
-
-                        PaymentModeId = i.PaymentModeId,
-                        PaymentMode = i.PaymentMode,
-                        IsActive = 1,
-                        IsCustom = (i.UserMasterId != null) ? true : false,
-                        UserMasterId = i.UserMasterId ?? null
-                    }
-                    ).ToList();
+                var transactionsPayementModes = await db.TransactionPaymentModes.AsNoTracking()
+                    .Where(i => i.IsActive == 1 /*&& (i.UserMasterId == userMasterID || i.UserMasterId == null)*/)
+                    .Select(i =>
+                        new TransactionPaymentModeDto
+                        {
+                            PaymentModeId = i.PaymentModeId,
+                            PaymentMode = i.PaymentMode,
+                            IsActive = 1,
+                            IsCustom = (i.UserMasterId != null) ? true : false,
+                            UserMasterId = i.UserMasterId ?? null
+                        }
+                    ).OrderBy(i => i.PaymentMode).ToListAsync();
 
                 return transactionsPayementModes;
             }
             catch (Exception ex)
             {
-
-                throw new Exception("\"There was an error fetching payement modes . Please try again.\"", ex); ;
+                throw new Exception("\"There was an error fetching payement modes . Please try again.\"", ex);
+                ;
             }
         }
 
-        public async Task<TransactionTotalDTO> GetTransactionSummary(Guid userid)
+        public async Task<TransactionTotalDto> GetTransactionSummary(Guid userid)
         {
-
             try
             {
                 var today = DateTime.UtcNow.Date;
@@ -847,16 +971,15 @@ namespace Budget_Tracker_WebAPI.Repositories
                 var lastMonthStart = new DateTime(lastMonth.Year, lastMonth.Month, 1);
                 var lastMonthEnd = monthStart.AddDays(-1);
 
-                var transactions = await db.TransactionMasters.
-                    AsNoTracking()
-                    .Where(i => i.UserId == userid && i.IsActive == 1 && i.TransactionDate.Date.Month == System.DateTime.Now.Month)
+                var transactions = await db.TransactionMasters.AsNoTracking()
+                    .Where(i => i.UserId == userid && i.IsActive == 1 &&
+                                i.TransactionDate.Date.Month == System.DateTime.Now.Month)
                     .ToListAsync();
 
                 var totalTransactions = await db.TransactionMasters
                     .AsNoTracking()
                     .Where(i => i.UserId == userid && i.IsActive == 1)
                     .ToListAsync();
-
 
 
                 var TotalBalance = (float)(totalTransactions.Where(i => i.TransactionTypeMasterId == 1)
@@ -871,28 +994,52 @@ namespace Budget_Tracker_WebAPI.Repositories
                     .Sum(i => i.TransactionAmount);
 
                 // Day
-                var todayIncome =(float) transactions.Where(i => i.TransactionTypeMasterId == 1 && i.TransactionDate.Date == today).Sum(i => i.TransactionAmount);
-                var yesterdayIncome = (float)transactions.Where(i => i.TransactionTypeMasterId == 1 && i.TransactionDate.Date == yesterday).Sum(i => i.TransactionAmount);
+                var todayIncome = (float)transactions
+                    .Where(i => i.TransactionTypeMasterId == 1 && i.TransactionDate.Date == today)
+                    .Sum(i => i.TransactionAmount);
+                var yesterdayIncome = (float)transactions
+                    .Where(i => i.TransactionTypeMasterId == 1 && i.TransactionDate.Date == yesterday)
+                    .Sum(i => i.TransactionAmount);
 
-                var todayExpense = (float)transactions.Where(i => i.TransactionTypeMasterId == 2 && i.TransactionDate.Date == today).Sum(i => i.TransactionAmount);
-                var yesterdayExpense = (float)transactions.Where(i => i.TransactionTypeMasterId == 2 && i.TransactionDate.Date == yesterday).Sum(i => i.TransactionAmount);
+                var todayExpense = (float)transactions
+                    .Where(i => i.TransactionTypeMasterId == 2 && i.TransactionDate.Date == today)
+                    .Sum(i => i.TransactionAmount);
+                var yesterdayExpense = (float)transactions
+                    .Where(i => i.TransactionTypeMasterId == 2 && i.TransactionDate.Date == yesterday)
+                    .Sum(i => i.TransactionAmount);
 
                 // Week
-                var thisWeekIncome = (float)transactions.Where(i => i.TransactionTypeMasterId == 1 && i.TransactionDate.Date >= weekStart).Sum(i => i.TransactionAmount);
-                var lastWeekIncome = (float)transactions.Where(i => i.TransactionTypeMasterId == 1 && i.TransactionDate.Date >= lastWeekStart && i.TransactionDate.Date <= lastWeekEnd).Sum(i => i.TransactionAmount);
+                var thisWeekIncome = (float)transactions
+                    .Where(i => i.TransactionTypeMasterId == 1 && i.TransactionDate.Date >= weekStart)
+                    .Sum(i => i.TransactionAmount);
+                var lastWeekIncome = (float)transactions
+                    .Where(i => i.TransactionTypeMasterId == 1 && i.TransactionDate.Date >= lastWeekStart &&
+                                i.TransactionDate.Date <= lastWeekEnd).Sum(i => i.TransactionAmount);
 
-                var thisWeekExpense = (float)transactions.Where(i => i.TransactionTypeMasterId == 2 && i.TransactionDate.Date >= weekStart).Sum(i => i.TransactionAmount);
-                var lastWeekExpense = (float)transactions.Where(i => i.TransactionTypeMasterId == 2 && i.TransactionDate.Date >= lastWeekStart && i.TransactionDate.Date <= lastWeekEnd).Sum(i => i.TransactionAmount);
+                var thisWeekExpense = (float)transactions
+                    .Where(i => i.TransactionTypeMasterId == 2 && i.TransactionDate.Date >= weekStart)
+                    .Sum(i => i.TransactionAmount);
+                var lastWeekExpense = (float)transactions
+                    .Where(i => i.TransactionTypeMasterId == 2 && i.TransactionDate.Date >= lastWeekStart &&
+                                i.TransactionDate.Date <= lastWeekEnd).Sum(i => i.TransactionAmount);
 
                 // Month
-                var thisMonthIncome = (float)transactions.Where(i => i.TransactionTypeMasterId == 1 && i.TransactionDate.Date >= monthStart).Sum(i => i.TransactionAmount);
-                var lastMonthIncome = (float)transactions.Where(i => i.TransactionTypeMasterId == 1 && i.TransactionDate.Date >= lastMonthStart && i.TransactionDate.Date <= lastMonthEnd).Sum(i => i.TransactionAmount);
+                var thisMonthIncome = (float)transactions
+                    .Where(i => i.TransactionTypeMasterId == 1 && i.TransactionDate.Date >= monthStart)
+                    .Sum(i => i.TransactionAmount);
+                var lastMonthIncome = (float)transactions
+                    .Where(i => i.TransactionTypeMasterId == 1 && i.TransactionDate.Date >= lastMonthStart &&
+                                i.TransactionDate.Date <= lastMonthEnd).Sum(i => i.TransactionAmount);
 
-                var thisMonthExpense = (float)transactions.Where(i => i.TransactionTypeMasterId == 2 && i.TransactionDate.Date >= monthStart).Sum(i => i.TransactionAmount);
-                var lastMonthExpense = (float)transactions.Where(i => i.TransactionTypeMasterId == 2 && i.TransactionDate.Date >= lastMonthStart && i.TransactionDate.Date <= lastMonthEnd).Sum(i => i.TransactionAmount);
+                var thisMonthExpense = (float)transactions
+                    .Where(i => i.TransactionTypeMasterId == 2 && i.TransactionDate.Date >= monthStart)
+                    .Sum(i => i.TransactionAmount);
+                var lastMonthExpense = (float)transactions
+                    .Where(i => i.TransactionTypeMasterId == 2 && i.TransactionDate.Date >= lastMonthStart &&
+                                i.TransactionDate.Date <= lastMonthEnd).Sum(i => i.TransactionAmount);
 
                 float CalculatePercent(float current, float previous) =>
-                 previous != 0 ? ((current - previous) / Math.Abs(previous)) * 100 : 0;
+                    previous != 0 ? ((current - previous) / Math.Abs(previous)) * 100 : 0;
 
                 var dayIncomeChange = CalculatePercent(todayIncome, yesterdayIncome);
                 var weekIncomeChange = CalculatePercent(thisWeekIncome, lastWeekIncome);
@@ -903,7 +1050,7 @@ namespace Budget_Tracker_WebAPI.Repositories
                 var monthExpenseChange = CalculatePercent(thisMonthExpense, lastMonthExpense);
 
                 // Create result object
-                var result = new TransactionTotalDTO
+                var result = new TransactionTotalDto
                 {
                     UserId = userid,
                     CurrentBalance = TotalBalance.ToString("N2"),
@@ -933,14 +1080,14 @@ namespace Budget_Tracker_WebAPI.Repositories
                 };
 
                 return result;
-
             }
             catch (Exception ex)
             {
-
-                throw new Exception("\"There was an error fetching types . Please try again.\"", ex); ;
+                throw new Exception("\"There was an error fetching types . Please try again.\"", ex);
+                ;
             }
         }
+
         public async Task<int> GetCountOfTransactions(Guid userId, int numberOfMonths)
         {
             try
@@ -948,38 +1095,41 @@ namespace Budget_Tracker_WebAPI.Repositories
                 var currentDate = System.DateTime.Now;
                 var fromDate = currentDate.AddMonths(-numberOfMonths);
 
-                int transactionCount = await db.TransactionMasters.Where(i => i.UserId == userId && i.TransactionDate <= currentDate && i.TransactionDate >= fromDate && i.IsActive == 1).CountAsync();
+                int transactionCount = await db.TransactionMasters.Where(i =>
+                    i.UserId == userId && i.TransactionDate <= currentDate && i.TransactionDate >= fromDate &&
+                    i.IsActive == 1).CountAsync();
 
 
                 return transactionCount;
-
             }
             catch (Exception ex)
             {
-
                 throw new Exception("\"There was an error fetching count of the transaction . Please try again.\"", ex);
             }
         }
 
-        public async Task<(List<TransactionDto> Transactions, int TotalItems)> GetPaginatedTransactionsByUserID(Guid userId, TransactionQueryParameters queryParams)
+        public async Task<(List<TransactionDto> Transactions, int TotalItems)> GetPaginatedTransactionsByUserID(
+            Guid userId, TransactionQueryParameters queryParams)
         {
             // Start with a base query
             var query = db.TransactionMasters
                 .Include(i => i.TransactionTypeMaster)
                 .Include(i => i.TransactionPaymentmode)
-
                 .Include(i => i.TransactionCategoryMaster)
-                .Where(t => t.UserId == userId && t.IsActive ==1);
+                .Where(t => t.UserId == userId && t.IsActive == 1);
 
             // Apply Filters
             if (queryParams.StartDate.HasValue)
             {
                 query = query.Where(t => t.TransactionDate >= queryParams.StartDate.Value);
             }
+
             if (!string.IsNullOrEmpty(queryParams.FilterCategory))
             {
-                query = query.Where(t => t.TransactionCategoryMaster.TransactionCategoryName == queryParams.FilterCategory);
+                query = query.Where(t =>
+                    t.TransactionCategoryMaster.TransactionCategoryName == queryParams.FilterCategory);
             }
+
             if (!string.IsNullOrEmpty(queryParams.SearchText))
             {
                 query = query.Where(t => t.TransactionDescription.Contains(queryParams.SearchText));
@@ -993,7 +1143,8 @@ namespace Budget_Tracker_WebAPI.Repositories
             // This part can be complex. A simple example:
             if (queryParams.SortDirection?.ToLower() == "desc")
             {
-                query = query.OrderByDescending(t => t.TransactionDate); // Simplified - you'd need a switch for other columns
+                query = query.OrderByDescending(t =>
+                    t.TransactionDate); // Simplified - you'd need a switch for other columns
             }
             else
             {
@@ -1006,7 +1157,6 @@ namespace Budget_Tracker_WebAPI.Repositories
                 .Take(queryParams.PageSize)
                 .Select(t => new TransactionDto
                 {
-
                     TransactionMasterId = t.TransactionMasterId,
                     TransactionAmount = t.TransactionAmount,
                     TransactionCategory = t.TransactionCategoryMaster.TransactionCategoryName,
@@ -1022,7 +1172,6 @@ namespace Budget_Tracker_WebAPI.Repositories
                     DeletedAt = t.DeletedAt,
                     IsActive = t.IsActive,
                     UserId = t.UserId
-
                 })
                 .ToListAsync();
 

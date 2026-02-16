@@ -6,9 +6,9 @@ namespace Budget_Tracker_WebAPI.Repositories
 {
     public class UserRepository : IUserRepository
     {
-        private readonly Db15765Context db;
+        private readonly DbExpenseTrackerContext db;
 
-        public UserRepository(Db15765Context _db) 
+        public UserRepository(DbExpenseTrackerContext _db) 
         {
         
             this.db = _db;

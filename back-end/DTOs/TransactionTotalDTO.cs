@@ -1,6 +1,6 @@
 ﻿namespace Budget_Tracker_WebAPI.DTOs
 {
-    public class TransactionTotalDTO
+    public class TransactionTotalDto
     {
         public Guid UserId { get; set; }
         public string? CurrentBalance { get; set; }
@@ -25,13 +25,14 @@
     }
     
     
-    public class TransactionSummaryDTO
+    public class TransactionSummaryDto
     {
         public Guid UserId { get; set; }    
         public double? CurrentBalance { get; set; }
         public double? TotalExpense { get; set; }
         public double? TotalIncome { get; set; }
         public int? NumberOfMonths { get; set; }
+        public double? AverageMonthlyExpense { get; set; }
         
     }
 }

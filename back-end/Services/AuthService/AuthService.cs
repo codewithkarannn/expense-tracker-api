@@ -10,23 +10,13 @@ using System.Text;
 
 namespace Budget_Tracker_WebAPI.Services
 {
-    public class AuthService : IAuthService
+    public class AuthService(IUserRepository userRepository, IConfiguration configuration) : IAuthService
     {
-        private readonly IUserRepository _userRepository;
-        private readonly IConfiguration _configuration;
-
-
-        public AuthService(IUserRepository userRepository, IConfiguration configuration)
-        {
-            _userRepository = userRepository;
-            _configuration = configuration;
-        }
-
         public UserDetailModel? GetUserDetail(Guid userId)
         {
             try
             {
-                return _userRepository.GetUserDetail(userId);
+                return userRepository.GetUserDetail(userId);
             }
             catch (Exception ex)
             {
@@ -39,7 +29,7 @@ namespace Budget_Tracker_WebAPI.Services
         {
             try
             {
-                if (await _userRepository.IsEmailExistsAsync(registerUserDto.Email))
+                if (await userRepository.IsEmailExistsAsync(registerUserDto.Email))
                 {
 
                     throw new ArgumentException("Email already exists. Please use a different email.");
@@ -60,7 +50,7 @@ namespace Budget_Tracker_WebAPI.Services
                     UserRoleId =   2
                 };
 
-                await _userRepository.AddUserAsync(user);
+                await userRepository.AddUserAsync(user);
             }
             catch (ArgumentException ex)
             {
@@ -76,7 +66,7 @@ namespace Budget_Tracker_WebAPI.Services
         public async Task<string> LoginUserAsync(LoginUserDTO  loginUserDto)
         {
             // Validate user credentials
-            var user = await _userRepository.GetUserByEmailAsync(loginUserDto.UserEmail);
+            var user = await userRepository.GetUserByEmailAsync(loginUserDto.UserEmail);
 
             if (user == null || !VerifyPassword(loginUserDto.Password, user.UserPassword))
             {
@@ -112,12 +102,12 @@ namespace Budget_Tracker_WebAPI.Services
             new Claim(ClaimTypes.Email, user.UserEmail)
             };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:SecretKey"]));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtSettings:SecretKey"]));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(
-                issuer: _configuration["JwtSettings:Issuer"],
-                audience: _configuration["JwtSettings:Audience"],
+                issuer: configuration["JwtSettings:Issuer"],
+                audience: configuration["JwtSettings:Audience"],
                 
                 claims: claims,
                 expires: DateTime.Now.AddHours(1),

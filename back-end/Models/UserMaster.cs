@@ -12,19 +12,22 @@ public partial class UserMaster
     public string? LastName { get; set; }
 
     public int? UserRoleId { get; set; }
-    
-    public int? CurrencyMasterId { get; set; }
 
     public string? UserEmail { get; set; }
 
     public string? UserPassword { get; set; }
-    
 
     public sbyte? IsActive { get; set; }
 
     public DateTime? CreatedAt { get; set; }
 
     public DateTime? DeletedAt { get; set; }
+
+    public int? CurrencyMasterId { get; set; }
+
+    public virtual ICollection<BudgetMaster> BudgetMasters { get; set; } = new List<BudgetMaster>();
+
+    public virtual CurrencyMaster? CurrencyMaster { get; set; }
 
     public virtual ICollection<TransactionCategoryMaster> TransactionCategoryMasters { get; set; } = new List<TransactionCategoryMaster>();
 
@@ -33,11 +36,6 @@ public partial class UserMaster
     public virtual ICollection<TransactionPaymentMode> TransactionPaymentModes { get; set; } = new List<TransactionPaymentMode>();
 
     public virtual ICollection<TransactionTypeMaster> TransactionTypeMasters { get; set; } = new List<TransactionTypeMaster>();
-    
-    public virtual ICollection<BudgetMaster> BudgetMasters { get; set; } = new List<BudgetMaster>();
-
 
     public virtual UserRoleMaster? UserRole { get; set; }
-    
-    public virtual CurrencyMaster? CurrencyMaster { get; set; }
 }

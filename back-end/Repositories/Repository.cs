@@ -6,10 +6,10 @@ namespace Budget_Tracker_WebAPI.Repositories
 {
     public class Repository<T>  : IRepository<T> where T : class
     {
-        private readonly Db15765Context _context;
+        private readonly DbExpenseTrackerContext _context;
         private readonly DbSet<T> _db;
 
-        public Repository(Db15765Context context)
+        public Repository(DbExpenseTrackerContext context)
         {
             _context = context;
             _db = _context.Set<T>();
