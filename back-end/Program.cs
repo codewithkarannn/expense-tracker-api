@@ -7,6 +7,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Budget_Tracker_WebAPI.Repositories.BudgetRepo;
+using Budget_Tracker_WebAPI.Repositories.UserRepo;
+using Budget_Tracker_WebAPI.Services.AuthService;
 using Budget_Tracker_WebAPI.Services.BudgetService;
 
 var builder = WebApplication.CreateBuilder(args);
